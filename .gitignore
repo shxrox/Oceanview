@@ -6,6 +6,7 @@ target/
 
 # Ignore database properties
 /src/main/resources/db.properties
+/src/main/resources/mail.properties
 
 # ==========================
 # IntelliJ IDEA
