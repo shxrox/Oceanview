@@ -2,6 +2,7 @@ package com.oceanview.controller;
 
 import com.oceanview.model.User;
 import com.oceanview.service.UserService;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,6 +19,7 @@ public class RegisterReceptionistServlet extends HttpServlet {
 
     @Override
     public void init() {
+        // Initialize the UserService
         this.userService = new UserService();
     }
 
@@ -25,7 +27,7 @@ public class RegisterReceptionistServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Security Check: Only Admin can register users
+        // 1. Security Check: Only Admin can register new receptionists
         HttpSession session = request.getSession(false);
         User currentUser = (session != null) ? (User) session.getAttribute("user") : null;
 
@@ -34,18 +36,22 @@ public class RegisterReceptionistServlet extends HttpServlet {
             return;
         }
 
-        // 2. Get Form Data
+        // 2. Retrieve form parameters from the registration page
         String fullName = request.getParameter("fullName");
         String email = request.getParameter("email");
         String username = request.getParameter("username");
 
         try {
-            // 3. Call Service to create user and send email
-            boolean success = userService.registerReceptionist(fullName, email, username);
+            // 3. Call UserService to register the receptionist
+            String generatedPassword = userService.registerReceptionist(fullName, email, username);
 
-            if (success) {
-                request.setAttribute("successMessage", "Receptionist registered successfully! Credentials sent via email.");
+            if (generatedPassword != null) {
+                // Registration successful
+                request.setAttribute("successMessage", "Receptionist registered successfully!");
+                request.setAttribute("generatedPassword", generatedPassword); // Optional: show on page
+                request.setAttribute("newUsername", username);
             } else {
+                // Registration failed (username/email might already exist)
                 request.setAttribute("errorMessage", "Registration failed. Username or Email might already exist.");
             }
 
@@ -54,7 +60,14 @@ public class RegisterReceptionistServlet extends HttpServlet {
             request.setAttribute("errorMessage", "Database error: " + e.getMessage());
         }
 
-        // 4. Send back to the registration page to show the result
+        // 4. Forward back to the registration page to show success/error messages
         request.getRequestDispatcher("register_receptionist.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Optionally, redirect GET requests to the registration page
+        response.sendRedirect("register_receptionist.jsp");
     }
 }
