@@ -41,27 +41,32 @@ public class RegisterReceptionistServlet extends HttpServlet {
         String email = request.getParameter("email");
         String username = request.getParameter("username");
 
+        // ... inside doPost method ...
+
         try {
-            // 3. Call UserService to register the receptionist
             String generatedPassword = userService.registerReceptionist(fullName, email, username);
 
             if (generatedPassword != null) {
-                // Registration successful
                 request.setAttribute("successMessage", "Receptionist registered successfully!");
-                request.setAttribute("generatedPassword", generatedPassword); // Optional: show on page
+                request.setAttribute("generatedPassword", generatedPassword);
                 request.setAttribute("newUsername", username);
             } else {
-                // Registration failed (username/email might already exist)
-                request.setAttribute("errorMessage", "Registration failed. Username or Email might already exist.");
+                request.setAttribute("errorMessage", "Registration failed. Username might already exist.");
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            request.setAttribute("errorMessage", "Database error: " + e.getMessage());
+            // CHECK: If the error message mentions "Duplicate entry", show a friendly error
+            if (e.getMessage().contains("Duplicate entry")) {
+                request.setAttribute("errorMessage", "Registration failed: This Username or Email is already taken.");
+            } else {
+                request.setAttribute("errorMessage", "Database error: " + e.getMessage());
+            }
         }
 
-        // 4. Forward back to the registration page to show success/error messages
-        request.getRequestDispatcher("receptionist_dashboard.jsp").forward(request, response);
+        request.getRequestDispatcher("register_receptionist.jsp").forward(request, response);
+
+// ... end of method ...
     }
 
     @Override

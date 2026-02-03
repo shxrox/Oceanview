@@ -38,7 +38,7 @@ public class UserService {
     }
 
     /**
-     * Register a new receptionist
+     * Register a new receptionist (FILE LOGGER VERSION)
      * @param fullName Full name of receptionist
      * @param email Email of receptionist (used for sending credentials)
      * @param username Username for login
@@ -46,18 +46,16 @@ public class UserService {
      * @throws SQLException if database error occurs
      */
     public String registerReceptionist(String fullName, String email, String username) throws SQLException {
-        // 1. Check if username already exists
+        // 1. Check if username exists
         if (userDAO.findByUsername(username) != null) {
-            return null; // Username already taken
+            return null; // Username taken
         }
 
-        // 2. Generate random password
+        // 2. Generate credentials
         String rawPassword = generateRandomPassword();
-
-        // 3. Hash the password for database
         String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
 
-        // 4. Create User object
+        // 3. Create User
         User receptionist = new User();
         receptionist.setFullName(fullName);
         receptionist.setEmail(email);
@@ -65,26 +63,30 @@ public class UserService {
         receptionist.setPassword(hashedPassword);
         receptionist.setRole("RECEPTIONIST");
 
-        // 5. Save user in database
-        boolean isSaved = userDAO.save(receptionist);
+        // 4. Save User
+        if (userDAO.save(receptionist)) {
 
-        if (isSaved) {
-            // Optional: send email notification in background
+            // 5. "Send" Email (Triggers File Logger via EmailUtility)
+            // Run in a separate thread so UI does not freeze
             new Thread(() -> {
                 try {
-                    String subject = "Ocean View Resort - Staff Login Credentials";
-                    String message = "Hello " + fullName + ",\n\n" +
-                            "Your account has been created.\n" +
+                    String subject = "Ocean View Resort - Your Login Credentials";
+                    String message = "Dear " + fullName + ",\n\n" +
+                            "Welcome to the team!\n" +
+                            "Your account has been created successfully.\n\n" +
                             "Username: " + username + "\n" +
                             "Password: " + rawPassword + "\n\n" +
-                            "Please login and change your password after first login.";
+                            "Please keep these credentials safe.\n\n" +
+                            "Ocean View Resort Management";
+
                     com.oceanview.util.EmailUtility.sendEmail(email, subject, message);
+
                 } catch (Exception e) {
-                    System.err.println("Failed to send email: " + e.getMessage());
+                    System.err.println("Failed to write email file: " + e.getMessage());
                 }
             }).start();
 
-            return rawPassword; // Return raw password for confirmation (optional)
+            return rawPassword; // Return password for admin / clipboard popup
         }
 
         return null; // Failed to save user

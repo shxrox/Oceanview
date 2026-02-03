@@ -1,55 +1,49 @@
 package com.oceanview.util;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class EmailUtility {
 
-    private static final Properties properties = new Properties();
-
-    static {
-        try (InputStream input = EmailUtility.class.getClassLoader().getResourceAsStream("mail.properties")) {
-            if (input == null) {
-                System.out.println("Error: mail.properties not found");
-            } else {
-                properties.load(input);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    // UPDATE: Your specific folder path
+    // We use double backslashes (\\) because single backslash is a special character in Java
+    private static final String EMAIL_FOLDER = "C:\\Users\\sharo\\OneDrive\\Pictures\\Documents\\ICBT-TOP\\semester-1\\Assessment\\ICBT_CIS6003_Advanced Programing\\OceanView\\FakeEmails";
 
     public static void sendEmail(String recipient, String subject, String content) {
-        // 1. Get the Session object with Authentication
-        Session session = Session.getInstance(properties, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(
-                        properties.getProperty("mail.username"),
-                        properties.getProperty("mail.password")
-                );
+        // 1. Create the directory if it doesn't exist
+        File directory = new File(EMAIL_FOLDER);
+        if (!directory.exists()) {
+            boolean created = directory.mkdirs();
+            if (created) {
+                System.out.println("Folder created: " + EMAIL_FOLDER);
             }
-        });
+        }
 
-        try {
-            // 2. Create the Message
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(properties.getProperty("mail.username")));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipient));
-            message.setSubject(subject);
-            message.setText(content); // Plain text email. Use setContent() for HTML.
+        // 2. Generate a unique filename
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String safeRecipient = recipient.replaceAll("[^a-zA-Z0-9.-]", "_");
+        String filename = "email_to_" + safeRecipient + "_" + timestamp + ".txt";
 
-            // 3. Send the Message
-            Transport.send(message);
-            System.out.println("Email sent successfully to: " + recipient);
+        File emailFile = new File(directory, filename);
 
-        } catch (MessagingException e) {
+        // 3. Write the "Email" content to the file
+        try (FileWriter writer = new FileWriter(emailFile)) {
+            writer.write("To: " + recipient + "\n");
+            writer.write("Subject: " + subject + "\n");
+            writer.write("Date: " + LocalDateTime.now() + "\n");
+            writer.write("--------------------------------------------------\n");
+            writer.write(content);
+            writer.write("\n--------------------------------------------------\n");
+            writer.write("[End of Message]");
+
+            System.out.println("✅ Email simulated! Check file: " + emailFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            System.err.println("❌ Failed to save email file: " + e.getMessage());
             e.printStackTrace();
-            System.err.println("Failed to send email: " + e.getMessage());
         }
     }
 }
