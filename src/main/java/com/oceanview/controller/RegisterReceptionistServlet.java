@@ -61,13 +61,13 @@ public class RegisterReceptionistServlet extends HttpServlet {
         }
 
         // 4. Forward back to the registration page to show success/error messages
-        request.getRequestDispatcher("register_receptionist.jsp").forward(request, response);
+        request.getRequestDispatcher("receptionist_dashboard.jsp").forward(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // Optionally, redirect GET requests to the registration page
-        response.sendRedirect("register_receptionist.jsp");
+        response.sendRedirect("receptionist_dashboard.jsp");
     }
 }

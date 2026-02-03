@@ -21,7 +21,7 @@
   <h2>Welcome, <%= user.getFullName() %> (Admin)</h2>
 
   <div class="action-buttons" style="margin-top: 30px;">
-    <a href="register_receptionist.jsp" class="button-link">Register New Receptionist</a>
+    <a href="receptionist_dashboard.jsp" class="button-link">Register New Receptionist</a>
   </div>
 
   <br><br>
