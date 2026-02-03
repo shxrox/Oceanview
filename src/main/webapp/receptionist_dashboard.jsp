@@ -28,7 +28,8 @@
     <h3>Receptionist Panel</h3>
 
     <div class="action-buttons" style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
-        <a href="search_rooms.jsp" class="button-link" style="background-color: #27ae60;">
+
+        <a href="searchRooms" class="button-link" style="background-color: #27ae60;">
             Make Reservation
         </a>
 
