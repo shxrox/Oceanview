@@ -169,3 +169,58 @@ button:hover { background-color: #2980b9; }
 .book-btn:hover {
     background-color: #2980b9;
 }
+/* --- ROOM GRID LAYOUT --- */
+.room-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+.room-card {
+    background: white;
+    width: 200px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.room-card:hover {
+    transform: scale(1.05); /* Slight zoom on hover */
+    border-color: #3498db;
+}
+
+/* Status Indicator */
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: white;
+    font-size: 12px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.status-free {
+    background-color: #27ae60; /* GREEN for Available */
+}
+
+.status-occupied {
+    background-color: #e74c3c; /* RED for Occupied */
+}
+
+.room-number {
+    font-size: 24px;
+    color: #2c3e50;
+    margin: 10px 0;
+}
+
+.room-price {
+    color: #7f8c8d;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
