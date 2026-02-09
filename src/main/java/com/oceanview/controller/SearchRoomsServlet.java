@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.List;
 
 @WebServlet("/searchRooms")
@@ -25,28 +26,37 @@ public class SearchRoomsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Check if dates are present
-        String checkIn = request.getParameter("checkIn");
-        String checkOut = request.getParameter("checkOut");
+        String checkInStr = request.getParameter("checkIn");
+        String checkOutStr = request.getParameter("checkOut");
 
-        // ROBUSTNESS CHECK: If dates are missing, force user to Step 1
-        if (checkIn == null || checkOut == null || checkIn.isEmpty() || checkOut.isEmpty()) {
+        // 1. Basic Null Check
+        if (checkInStr == null || checkOutStr == null || checkInStr.isEmpty() || checkOutStr.isEmpty()) {
             response.sendRedirect("wizard_dates.jsp");
             return;
         }
 
-        // 2. Get available rooms
-        // (In a real app, we would filter by date here, but for now we show all available rooms)
-        List<Room> rooms = roomService.getAvailableRooms();
+        // 2. Logic Validation (Start Date > End Date?)
+        try {
+            Date checkIn = Date.valueOf(checkInStr);
+            Date checkOut = Date.valueOf(checkOutStr);
 
-        // 3. Attach data to request
-        request.setAttribute("rooms", rooms);
-        // The dates are automatically available in the JSP via request.getParameter,
-        // but we can set them explicitly to be safe.
-        request.setAttribute("checkIn", checkIn);
-        request.setAttribute("checkOut", checkOut);
+            // If Check-Out is BEFORE or SAME DAY as Check-In -> ERROR
+            if (checkOut.before(checkIn) || checkOut.equals(checkIn)) {
+                response.sendRedirect("wizard_dates.jsp?error=Check-out date must be after Check-in date.");
+                return;
+            }
 
-        // 4. Forward to the Room List (Step 2)
-        request.getRequestDispatcher("search_rooms.jsp").forward(request, response);
+            // 3. Get available rooms
+            List<Room> rooms = roomService.getAvailableRooms();
+
+            request.setAttribute("rooms", rooms);
+            request.setAttribute("checkIn", checkInStr);
+            request.setAttribute("checkOut", checkOutStr);
+
+            request.getRequestDispatcher("search_rooms.jsp").forward(request, response);
+
+        } catch (IllegalArgumentException e) {
+            response.sendRedirect("wizard_dates.jsp?error=Invalid date format.");
+        }
     }
 }
