@@ -5,64 +5,78 @@
   Time: 18:19
   To change this template use File | Settings | File Templates.
 --%>
+
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.oceanview.model.Room" %>
 <%@ page import="com.oceanview.model.User" %>
 <%
-    // Security Check
     User user = (User) session.getAttribute("user");
     if (user == null || !"RECEPTIONIST".equals(user.getRole())) {
         response.sendRedirect("index.jsp");
         return;
     }
-
-    // Get the list of rooms
     List<Room> rooms = (List<Room>) request.getAttribute("rooms");
+
+    // Retrieve dates if they were selected in Step 1 (We will build Step 1 next)
+    String checkIn = request.getParameter("checkIn");
+    String checkOut = request.getParameter("checkOut");
 %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Live Room Status - Ocean View Resort</title>
+    <title>Select Room - Ocean View Resort</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div class="dashboard-container" style="max-width: 1000px; margin: 40px auto;">
-    <h2 style="text-align: center;">Live Room Status</h2>
-    <p style="text-align: center; color: #7f8c8d;">Select a room to begin reservation.</p>
+<div class="dashboard-container" style="max-width: 800px; margin: 50px auto;">
+    <h2 style="text-align: center;">Step 2: Select a Room</h2>
+
+    <% if (checkIn != null && checkOut != null) { %>
+    <p style="text-align: center; color: #27ae60;">
+        Showing rooms for: <strong><%= checkIn %></strong> to <strong><%= checkOut %></strong>
+    </p>
+    <% } %>
 
     <div style="text-align: right; margin-bottom: 20px;">
-        <a href="receptionist_dashboard.jsp" style="text-decoration: none; color: #7f8c8d;">&larr; Back to Dashboard</a>
+        <a href="receptionist_dashboard.jsp" style="text-decoration: none; color: #7f8c8d;">Cancel</a>
     </div>
 
-    <div class="room-grid">
+    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+        <thead>
+        <tr style="background-color: #ecf0f1;">
+            <th style="padding: 10px;">Room</th>
+            <th style="padding: 10px;">Type</th>
+            <th style="padding: 10px;">Price</th>
+            <th style="padding: 10px;">Action</th>
+        </tr>
+        </thead>
+        <tbody>
         <%
             if (rooms != null && !rooms.isEmpty()) {
                 for (Room room : rooms) {
         %>
-        <div class="room-card">
-            <span class="status-badge status-free">Available</span>
-
-            <div class="room-number">Room <%= room.getRoomNumber() %></div>
-            <div class="room-type"><%= room.getRoomType() %></div>
-            <div class="room-price">$<%= room.getPricePerNight() %> / night</div>
-
-            <a href="bookRoom?roomId=<%= room.getId() %>" class="button-link"
-               style="background-color: #3498db; display: block; margin-top: 10px;">
-                Book Now
-            </a>
-        </div>
+        <tr>
+            <td style="padding: 10px;"><strong><%= room.getRoomNumber() %></strong></td>
+            <td style="padding: 10px;"><%= room.getRoomType() %></td>
+            <td style="padding: 10px;">$<%= room.getPricePerNight() %></td>
+            <td style="padding: 10px;">
+                <a href="bookRoom?roomId=<%= room.getId() %>&checkIn=<%= checkIn %>&checkOut=<%= checkOut %>"
+                   style="background-color: #3498db; color: white; padding: 5px 10px; text-decoration: none; border-radius: 4px;">
+                    Select This Room
+                </a>
+            </td>
+        </tr>
         <%
             }
         } else {
         %>
-        <div style="width: 100%; text-align: center; padding: 40px; color: #95a5a6;">
-            <h3>No rooms available right now.</h3>
-        </div>
+        <tr><td colspan="4" style="padding: 20px;">No rooms available.</td></tr>
         <% } %>
-    </div>
+        </tbody>
+    </table>
 </div>
 
 </body>
