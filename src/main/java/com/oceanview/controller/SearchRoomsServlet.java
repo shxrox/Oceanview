@@ -29,25 +29,21 @@ public class SearchRoomsServlet extends HttpServlet {
         String checkInStr = request.getParameter("checkIn");
         String checkOutStr = request.getParameter("checkOut");
 
-        // 1. Basic Null Check
         if (checkInStr == null || checkOutStr == null || checkInStr.isEmpty() || checkOutStr.isEmpty()) {
             response.sendRedirect("wizard_dates.jsp");
             return;
         }
 
-        // 2. Logic Validation (Start Date > End Date?)
         try {
             Date checkIn = Date.valueOf(checkInStr);
             Date checkOut = Date.valueOf(checkOutStr);
 
-            // If Check-Out is BEFORE or SAME DAY as Check-In -> ERROR
             if (checkOut.before(checkIn) || checkOut.equals(checkIn)) {
                 response.sendRedirect("wizard_dates.jsp?error=Check-out date must be after Check-in date.");
                 return;
             }
 
-            // 3. Get available rooms
-            List<Room> rooms = roomService.getAvailableRooms();
+            List<Room> rooms = roomService.getAvailableRooms(checkIn, checkOut);
 
             request.setAttribute("rooms", rooms);
             request.setAttribute("checkIn", checkInStr);

@@ -12,27 +12,33 @@ public class RoomService {
     private RoomDAO roomDAO;
 
     public RoomService() {
-        // Initialize the DAO
         this.roomDAO = new RoomDAOImpl();
     }
 
-    // 1. Get all rooms that are currently free
     public List<Room> getAvailableRooms() {
         try {
             return roomDAO.findAllAvailable();
         } catch (SQLException e) {
             e.printStackTrace();
-            return new ArrayList<>(); // Return empty list on error
+            return new ArrayList<>();
         }
     }
 
-    // 2. Get details of a specific room by ID
     public Room getRoomById(int id) {
         try {
             return roomDAO.findById(id);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public List<Room> getAvailableRooms(java.sql.Date checkIn, java.sql.Date checkOut) {
+        try {
+            return roomDAO.findAvailableRoomsByDate(checkIn, checkOut);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
         }
     }
 }
