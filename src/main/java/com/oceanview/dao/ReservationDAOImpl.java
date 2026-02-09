@@ -11,7 +11,6 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public boolean save(Reservation reservation) throws SQLException {
-        // UPDATED SQL: Added check_in and check_out columns
         String sql = "INSERT INTO reservations (room_id, customer_name, customer_email, customer_phone, check_in, check_out) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
@@ -21,8 +20,6 @@ public class ReservationDAOImpl implements ReservationDAO {
             stmt.setString(2, reservation.getCustomerName());
             stmt.setString(3, reservation.getCustomerEmail());
             stmt.setString(4, reservation.getCustomerPhone());
-
-            // NEW: Set the dates
             stmt.setDate(5, reservation.getCheckIn());
             stmt.setDate(6, reservation.getCheckOut());
 
@@ -46,16 +43,34 @@ public class ReservationDAOImpl implements ReservationDAO {
                 res.setCustomerName(rs.getString("customer_name"));
                 res.setCustomerEmail(rs.getString("customer_email"));
                 res.setCustomerPhone(rs.getString("customer_phone"));
-
-                // NEW: Get the dates
                 res.setCheckIn(rs.getDate("check_in"));
                 res.setCheckOut(rs.getDate("check_out"));
-
                 res.setBookingDate(rs.getTimestamp("booking_date"));
 
                 list.add(res);
             }
         }
         return list;
+    }
+
+    public java.util.Map<String, Integer> getRoomTypeCounts() throws SQLException {
+        java.util.Map<String, Integer> stats = new java.util.HashMap<>();
+
+        String sql = "SELECT r.room_type, COUNT(res.id) as total " +
+                "FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "GROUP BY r.room_type";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                String type = rs.getString("room_type");
+                int count = rs.getInt("total");
+                stats.put(type, count);
+            }
+        }
+        return stats;
     }
 }
