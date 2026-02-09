@@ -2,6 +2,7 @@ package com.oceanview.dao;
 
 import com.oceanview.model.Room;
 import com.oceanview.util.DBConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,22 +10,24 @@ import java.util.List;
 public class RoomDAOImpl implements RoomDAO {
 
     @Override
-    public List<Room> findAllAvailable() throws SQLException {
+    public List<Room> getAllRooms() throws SQLException {
         List<Room> rooms = new ArrayList<>();
-        String sql = "SELECT * FROM rooms WHERE is_available = TRUE";
+        String sql = "SELECT * FROM rooms";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                Room room = new Room(
-                        rs.getInt("id"),
-                        rs.getString("room_number"),
-                        rs.getString("room_type"),
-                        rs.getDouble("price_per_night"),
-                        rs.getBoolean("is_available")
-                );
+                Room room = new Room();
+                room.setId(rs.getInt("id"));
+                room.setRoomNumber(rs.getString("room_number"));
+                room.setRoomType(rs.getString("room_type"));
+
+                // FIXED: Use "price_per_night"
+                room.setPricePerNight(rs.getDouble("price_per_night"));
+
+                room.setAvailable(rs.getBoolean("is_available"));
                 rooms.add(room);
             }
         }
@@ -34,38 +37,37 @@ public class RoomDAOImpl implements RoomDAO {
     @Override
     public Room findById(int id) throws SQLException {
         String sql = "SELECT * FROM rooms WHERE id = ?";
-        Room room = null;
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    room = new Room(
-                            rs.getInt("id"),
-                            rs.getString("room_number"),
-                            rs.getString("room_type"),
-                            rs.getDouble("price_per_night"),
-                            rs.getBoolean("is_available")
-                    );
-                }
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Room room = new Room();
+                room.setId(rs.getInt("id"));
+                room.setRoomNumber(rs.getString("room_number"));
+                room.setRoomType(rs.getString("room_type"));
+
+                // FIXED: Use "price_per_night"
+                room.setPricePerNight(rs.getDouble("price_per_night"));
+
+                room.setAvailable(rs.getBoolean("is_available"));
+                return room;
             }
         }
-        return room;
+        return null;
     }
 
     @Override
-    public boolean updateAvailability(int id, boolean isAvailable) throws SQLException {
+    public void updateAvailability(int id, boolean isAvailable) throws SQLException {
         String sql = "UPDATE rooms SET is_available = ? WHERE id = ?";
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setBoolean(1, isAvailable);
             stmt.setInt(2, id);
-
-            return stmt.executeUpdate() > 0;
+            stmt.executeUpdate();
         }
     }
 
@@ -73,9 +75,10 @@ public class RoomDAOImpl implements RoomDAO {
     public List<Room> findAvailableRoomsByDate(java.sql.Date checkIn, java.sql.Date checkOut) throws SQLException {
         List<Room> rooms = new ArrayList<>();
 
+        // This query finds rooms that DO NOT have a reservation overlapping the requested dates.
         String sql = "SELECT * FROM rooms r WHERE r.id NOT IN (" +
-                "SELECT res.room_id FROM reservations res " +
-                "WHERE res.check_in < ? AND res.check_out > ? " +
+                "    SELECT res.room_id FROM reservations res " +
+                "    WHERE res.check_in < ? AND res.check_out > ? " +
                 ")";
 
         try (Connection conn = DBConnection.getConnection();
@@ -91,7 +94,11 @@ public class RoomDAOImpl implements RoomDAO {
                 room.setId(rs.getInt("id"));
                 room.setRoomNumber(rs.getString("room_number"));
                 room.setRoomType(rs.getString("room_type"));
+
+                // FIXED: Use "price_per_night"
                 room.setPricePerNight(rs.getDouble("price_per_night"));
+
+                // Logic: If it's returned by this query, it is available for these dates
                 room.setAvailable(true);
                 rooms.add(room);
             }
