@@ -5,12 +5,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface RoomDAO {
-    // Method to get a list of all rooms that are currently empty
-    List<Room> findAllAvailable() throws SQLException;
-
-    // Method to find a specific room by its ID
+    List<Room> getAllRooms() throws SQLException;
     Room findById(int id) throws SQLException;
+    void updateAvailability(int id, boolean isAvailable) throws SQLException;
 
-    // Method to change a room's status (e.g., from Available to Booked)
-    boolean updateAvailability(int id, boolean isAvailable) throws SQLException;
+    // NEW METHOD
+    List<Room> findAvailableRoomsByDate(java.sql.Date checkIn, java.sql.Date checkOut) throws SQLException;
 }

@@ -68,4 +68,34 @@ public class RoomDAOImpl implements RoomDAO {
             return stmt.executeUpdate() > 0;
         }
     }
+
+    @Override
+    public List<Room> findAvailableRoomsByDate(java.sql.Date checkIn, java.sql.Date checkOut) throws SQLException {
+        List<Room> rooms = new ArrayList<>();
+
+        String sql = "SELECT * FROM rooms r WHERE r.id NOT IN (" +
+                "SELECT res.room_id FROM reservations res " +
+                "WHERE res.check_in < ? AND res.check_out > ? " +
+                ")";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDate(1, checkOut);
+            stmt.setDate(2, checkIn);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Room room = new Room();
+                room.setId(rs.getInt("id"));
+                room.setRoomNumber(rs.getString("room_number"));
+                room.setRoomType(rs.getString("room_type"));
+                room.setPricePerNight(rs.getDouble("price_per_night"));
+                room.setAvailable(true);
+                rooms.add(room);
+            }
+        }
+        return rooms;
+    }
 }
