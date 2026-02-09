@@ -22,26 +22,20 @@ public class ReservationService {
         this.roomDAO = new RoomDAOImpl();
     }
 
-    // UPDATED: Added checkIn and checkOut parameters
     public boolean processBooking(int roomId, String customerName, String customerEmail, String customerPhone, Date checkIn, Date checkOut) {
         try {
-            // 1. Double check: Is the room still available?
             Room room = roomDAO.findById(roomId);
             if (room == null || !room.isAvailable()) {
                 return false;
             }
 
-            // 2. Create the Reservation object (UPDATED)
             Reservation res = new Reservation(roomId, customerName, customerEmail, customerPhone, checkIn, checkOut);
 
-            // 3. Save to Database
             boolean isSaved = reservationDAO.save(res);
 
             if (isSaved) {
-                // 4. Mark room as occupied
                 roomDAO.updateAvailability(roomId, false);
 
-                // 5. Send Confirmation Email (UPDATED Message)
                 String subject = "Booking Confirmation - Ocean View Resort";
                 String message = "Dear " + customerName + ",\n\n" +
                         "Thank you for choosing Ocean View Resort.\n" +
@@ -67,6 +61,15 @@ public class ReservationService {
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public java.util.Map<String, Integer> getRoomTypeStats() {
+        try {
+            return reservationDAO.getRoomTypeCounts();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new java.util.HashMap<>();
         }
     }
 }
