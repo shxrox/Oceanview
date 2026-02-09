@@ -9,19 +9,21 @@
 <%@ page import="com.oceanview.model.Room" %>
 <%@ page import="com.oceanview.model.User" %>
 <%
-  // Security Check
   User user = (User) session.getAttribute("user");
   if (user == null || !"RECEPTIONIST".equals(user.getRole())) {
     response.sendRedirect("index.jsp");
     return;
   }
 
-  // Get the room sent by the Servlet
   Room room = (Room) request.getAttribute("room");
   if (room == null) {
     response.sendRedirect("searchRooms");
     return;
   }
+
+  // NEW: Retrieve the dates passed from Step 2
+  String checkIn = (String) request.getAttribute("checkIn");
+  String checkOut = (String) request.getAttribute("checkOut");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -33,18 +35,20 @@
 <body>
 
 <div class="login-container" style="width: 450px; margin-top: 50px;">
-  <h2>Confirm Reservation</h2>
+  <h2>Step 3: Guest Details</h2>
 
   <div style="background: #ecf0f1; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left;">
-    <p><strong>Room:</strong> <%= room.getRoomNumber() %></p>
-    <p><strong>Type:</strong> <%= room.getRoomType() %></p>
+    <p><strong>Room:</strong> <%= room.getRoomNumber() %> (<%= room.getRoomType() %>)</p>
+    <p><strong>Check-In:</strong> <%= checkIn %></p>
+    <p><strong>Check-Out:</strong> <%= checkOut %></p>
     <p><strong>Price:</strong> $<%= room.getPricePerNight() %> / night</p>
   </div>
 
   <form action="processBooking" method="post">
     <input type="hidden" name="roomId" value="<%= room.getId() %>">
 
-    <h3>Guest Details</h3>
+    <input type="hidden" name="checkIn" value="<%= checkIn %>">
+    <input type="hidden" name="checkOut" value="<%= checkOut %>">
 
     <div class="form-group">
       <label for="customerName">Customer Name</label>
