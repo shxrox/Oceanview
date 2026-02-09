@@ -24,17 +24,20 @@ public class BookRoomServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Get the Room ID from the URL (e.g., ?roomId=101)
         String idParam = request.getParameter("roomId");
+        // NEW: Capture dates from URL
+        String checkIn = request.getParameter("checkIn");
+        String checkOut = request.getParameter("checkOut");
 
         if (idParam != null) {
             int roomId = Integer.parseInt(idParam);
-
-            // 2. Find the Room details
             Room room = roomService.getRoomById(roomId);
 
-            // 3. Send Room to the JSP Form
             request.setAttribute("room", room);
+            // NEW: Send dates to the JSP form
+            request.setAttribute("checkIn", checkIn);
+            request.setAttribute("checkOut", checkOut);
+
             request.getRequestDispatcher("book_room.jsp").forward(request, response);
         } else {
             response.sendRedirect("searchRooms");

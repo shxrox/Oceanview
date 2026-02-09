@@ -11,7 +11,8 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public boolean save(Reservation reservation) throws SQLException {
-        String sql = "INSERT INTO reservations (room_id, customer_name, customer_email, customer_phone) VALUES (?, ?, ?, ?)";
+        // UPDATED SQL: Added check_in and check_out columns
+        String sql = "INSERT INTO reservations (room_id, customer_name, customer_email, customer_phone, check_in, check_out) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -20,6 +21,10 @@ public class ReservationDAOImpl implements ReservationDAO {
             stmt.setString(2, reservation.getCustomerName());
             stmt.setString(3, reservation.getCustomerEmail());
             stmt.setString(4, reservation.getCustomerPhone());
+
+            // NEW: Set the dates
+            stmt.setDate(5, reservation.getCheckIn());
+            stmt.setDate(6, reservation.getCheckOut());
 
             return stmt.executeUpdate() > 0;
         }
@@ -41,6 +46,11 @@ public class ReservationDAOImpl implements ReservationDAO {
                 res.setCustomerName(rs.getString("customer_name"));
                 res.setCustomerEmail(rs.getString("customer_email"));
                 res.setCustomerPhone(rs.getString("customer_phone"));
+
+                // NEW: Get the dates
+                res.setCheckIn(rs.getDate("check_in"));
+                res.setCheckOut(rs.getDate("check_out"));
+
                 res.setBookingDate(rs.getTimestamp("booking_date"));
 
                 list.add(res);
