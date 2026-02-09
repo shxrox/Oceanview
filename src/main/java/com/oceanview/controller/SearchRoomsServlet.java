@@ -25,13 +25,28 @@ public class SearchRoomsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Get available rooms from Service
-        List<Room> availableRooms = roomService.getAvailableRooms();
+        // 1. Check if dates are present
+        String checkIn = request.getParameter("checkIn");
+        String checkOut = request.getParameter("checkOut");
 
-        // 2. Attach the list to the request so JSP can see it
-        request.setAttribute("rooms", availableRooms);
+        // ROBUSTNESS CHECK: If dates are missing, force user to Step 1
+        if (checkIn == null || checkOut == null || checkIn.isEmpty() || checkOut.isEmpty()) {
+            response.sendRedirect("wizard_dates.jsp");
+            return;
+        }
 
-        // 3. Forward to the JSP page
+        // 2. Get available rooms
+        // (In a real app, we would filter by date here, but for now we show all available rooms)
+        List<Room> rooms = roomService.getAvailableRooms();
+
+        // 3. Attach data to request
+        request.setAttribute("rooms", rooms);
+        // The dates are automatically available in the JSP via request.getParameter,
+        // but we can set them explicitly to be safe.
+        request.setAttribute("checkIn", checkIn);
+        request.setAttribute("checkOut", checkOut);
+
+        // 4. Forward to the Room List (Step 2)
         request.getRequestDispatcher("search_rooms.jsp").forward(request, response);
     }
 }

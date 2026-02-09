@@ -10,14 +10,12 @@
 <%@ page import="com.oceanview.model.Reservation" %>
 <%@ page import="com.oceanview.model.User" %>
 <%
-    // 1. Security Check
     User user = (User) session.getAttribute("user");
     if (user == null || !"RECEPTIONIST".equals(user.getRole())) {
         response.sendRedirect("index.jsp");
         return;
     }
 
-    // 2. Get the list sent by the Servlet
     List<Reservation> list = (List<Reservation>) request.getAttribute("reservationList");
 %>
 <!DOCTYPE html>
@@ -29,7 +27,7 @@
 </head>
 <body>
 
-<div class="dashboard-container" style="max-width: 900px; margin: 50px auto;">
+<div class="dashboard-container" style="max-width: 1000px; margin: 50px auto;">
     <h2 style="text-align: center;">All Reservations</h2>
 
     <div style="text-align: right; margin-bottom: 20px;">
@@ -40,10 +38,9 @@
         <thead>
         <tr style="background-color: #f39c12; color: white;">
             <th style="padding: 10px;">ID</th>
-            <th style="padding: 10px;">Room ID</th>
-            <th style="padding: 10px;">Customer Name</th>
-            <th style="padding: 10px;">Email</th>
-            <th style="padding: 10px;">Phone</th>
+            <th style="padding: 10px;">Room</th>
+            <th style="padding: 10px;">Customer</th>
+            <th style="padding: 10px;">Dates (In / Out)</th> <th style="padding: 10px;">Phone</th>
             <th style="padding: 10px;">Date Booked</th>
         </tr>
         </thead>
@@ -55,8 +52,16 @@
         <tr style="border-bottom: 1px solid #ddd;">
             <td style="padding: 10px;"><%= res.getId() %></td>
             <td style="padding: 10px;"><%= res.getRoomId() %></td>
-            <td style="padding: 10px;"><strong><%= res.getCustomerName() %></strong></td>
-            <td style="padding: 10px;"><%= res.getCustomerEmail() %></td>
+            <td style="padding: 10px;">
+                <strong><%= res.getCustomerName() %></strong><br>
+                <span style="font-size: 12px; color: #7f8c8d;"><%= res.getCustomerEmail() %></span>
+            </td>
+
+            <td style="padding: 10px;">
+                <span style="color: #27ae60;">In: <%= res.getCheckIn() %></span><br>
+                <span style="color: #c0392b;">Out: <%= res.getCheckOut() %></span>
+            </td>
+
             <td style="padding: 10px;"><%= res.getCustomerPhone() %></td>
             <td style="padding: 10px;"><%= res.getBookingDate() %></td>
         </tr>
