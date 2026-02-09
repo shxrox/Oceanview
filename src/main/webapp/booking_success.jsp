@@ -6,40 +6,77 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.oceanview.model.User" %>
+<%@ page import="com.oceanview.model.Room" %>
+<%@ page import="com.oceanview.service.RoomService" %>
+<%@ page import="java.time.LocalDate" %>
+<%@ page import="java.time.temporal.ChronoUnit" %>
 <%
-    // Security Check
-    User user = (User) session.getAttribute("user");
-    if (user == null || !"RECEPTIONIST".equals(user.getRole())) {
-        response.sendRedirect("index.jsp");
-        return;
+    String name = request.getParameter("name");
+    String checkIn = request.getParameter("in");
+    String checkOut = request.getParameter("out");
+    String roomIdStr = request.getParameter("id");
+
+    // Default values
+    double price = 0;
+    double total = 0;
+    long nights = 1;
+    String roomNumber = "Unknown";
+
+    if (roomIdStr != null) {
+        RoomService rs = new RoomService();
+        Room room = rs.getRoomById(Integer.parseInt(roomIdStr));
+        if (room != null) {
+            price = room.getPricePerNight();
+            roomNumber = room.getRoomNumber();
+
+            // CALCULATE NIGHTS
+            if (checkIn != null && checkOut != null) {
+                try {
+                    LocalDate d1 = LocalDate.parse(checkIn);
+                    LocalDate d2 = LocalDate.parse(checkOut);
+                    nights = ChronoUnit.DAYS.between(d1, d2);
+                    if (nights < 1) nights = 1; // Minimum 1 night
+                } catch (Exception e) {
+                    nights = 1; // Fallback if dates are weird
+                }
+            }
+
+            // Calculate Total
+            total = price * nights;
+        }
     }
 %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Booking Confirmed - Ocean View Resort</title>
+    <title>Booking Confirmed</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .success-icon { font-size: 50px; color: #27ae60; margin-bottom: 20px; }
+    </style>
 </head>
 <body>
 
-<div class="dashboard-container" style="text-align: center; margin-top: 100px;">
+<div class="login-container" style="text-align: center; margin-top: 100px;">
+    <div class="success-icon">✔</div>
+    <h2>Booking Successful!</h2>
+    <p>The room has been reserved for <strong><%= nights %></strong> night(s).</p>
+    <p>A confirmation email has been sent to the customer.</p>
 
-    <div style="background-color: #27ae60; color: white; width: 60px; height: 60px; line-height: 60px; border-radius: 50%; margin: 0 auto; font-size: 30px;">
-        ✓
+    <% if (name != null) { %>
+    <div style="margin: 20px 0;">
+        <a href="print_receipt.jsp?id=<%= roomIdStr %>&name=<%= name %>&room=<%= roomNumber %>&in=<%= checkIn %>&out=<%= checkOut %>&price=<%= price %>&total=<%= total %>"
+           target="_blank"
+           class="button-link"
+           style="background-color: #8e44ad;">
+            📄 Download Invoice ($<%= total %>)
+        </a>
     </div>
+    <% } %>
 
-    <h2 style="color: #2c3e50; margin-top: 20px;">Reservation Successful!</h2>
-    <p>The room has been booked and a confirmation email has been generated.</p>
-
-    <br><br>
-
-    <div class="action-buttons">
-        <a href="searchRooms" class="button-link">Make Another Reservation</a>
-        <a href="receptionist_dashboard.jsp" class="button-link" style="background-color: #7f8c8d;">Back to Dashboard</a>
-    </div>
-
+    <br>
+    <a href="receptionist_dashboard.jsp" class="button-link">Back to Dashboard</a>
 </div>
 
 </body>

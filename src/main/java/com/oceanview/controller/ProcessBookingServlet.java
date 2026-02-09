@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.sql.Date;
 
 @WebServlet("/processBooking")
@@ -29,30 +30,46 @@ public class ProcessBookingServlet extends HttpServlet {
             String name = request.getParameter("customerName");
             String email = request.getParameter("customerEmail");
             String phone = request.getParameter("customerPhone");
-
-            // NEW: Capture Dates (Strings)
             String checkInStr = request.getParameter("checkIn");
             String checkOutStr = request.getParameter("checkOut");
 
-            // Convert Strings to SQL Dates
+            // 2. Convert Strings to SQL Dates
             Date checkIn = Date.valueOf(checkInStr);
             Date checkOut = Date.valueOf(checkOutStr);
 
-            // 2. Call Service to Process Booking (Updated method)
-            boolean isSuccess = reservationService.processBooking(roomId, name, email, phone, checkIn, checkOut);
+            // 3. Process the Booking
+            boolean isSuccess = reservationService.processBooking(
+                    roomId, name, email, phone, checkIn, checkOut
+            );
 
             if (isSuccess) {
-                // 3. Success -> Send to Success Page
-                response.sendRedirect("booking_success.jsp");
+                // 4. Success -> Redirect with parameters
+                String encodedName = URLEncoder.encode(name, "UTF-8");
+                String encodedEmail = URLEncoder.encode(email, "UTF-8");
+                String encodedPhone = URLEncoder.encode(phone, "UTF-8");
+
+                response.sendRedirect("booking_success.jsp" +
+                        "?status=success" +
+                        "&id=" + roomId +
+                        "&name=" + encodedName +
+                        "&email=" + encodedEmail +
+                        "&phone=" + encodedPhone +
+                        "&in=" + checkInStr +
+                        "&out=" + checkOutStr
+                );
             } else {
-                // 4. Failure -> Send back to search with error
+                // 5. Failure -> Forward back to search page with error message
                 request.setAttribute("errorMessage", "Booking failed. Room might be taken.");
                 request.getRequestDispatcher("searchRooms").forward(request, response);
             }
 
         } catch (IllegalArgumentException e) {
-            // Handles bad date formats or numbers
-            response.sendRedirect("searchRooms");
+            // Handles bad date formats or invalid numbers
+            response.sendRedirect("searchRooms?error=Invalid+input");
+        } catch (Exception e) {
+            // Catch-all for any unexpected errors
+            e.printStackTrace();
+            response.sendRedirect("searchRooms?error=Server+error");
         }
     }
 }
