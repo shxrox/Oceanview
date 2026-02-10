@@ -1,6 +1,6 @@
 package com.oceanview.model;
 
-import java.sql.Date; // IMPORT THIS!
+import java.sql.Date;
 import java.sql.Timestamp;
 
 public class Reservation {
@@ -13,16 +13,20 @@ public class Reservation {
     private Date checkOut;
     private Timestamp bookingDate;
 
+    // NEW FIELDS for Invoice Display
+    private String roomNumber;
+    private double pricePerNight;
+
+    // Constructors
     public Reservation() {}
 
-    // Update Constructor to include dates
     public Reservation(int roomId, String customerName, String customerEmail, String customerPhone, Date checkIn, Date checkOut) {
         this.roomId = roomId;
         this.customerName = customerName;
         this.customerEmail = customerEmail;
         this.customerPhone = customerPhone;
-        this.checkIn = checkIn;   // NEW
-        this.checkOut = checkOut; // NEW
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
     }
 
     // Getters and Setters
@@ -41,7 +45,6 @@ public class Reservation {
     public String getCustomerPhone() { return customerPhone; }
     public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
 
-    // NEW GETTERS AND SETTERS
     public Date getCheckIn() { return checkIn; }
     public void setCheckIn(Date checkIn) { this.checkIn = checkIn; }
 
@@ -50,4 +53,11 @@ public class Reservation {
 
     public Timestamp getBookingDate() { return bookingDate; }
     public void setBookingDate(Timestamp bookingDate) { this.bookingDate = bookingDate; }
+
+    // NEW Getters/Setters
+    public String getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
+
+    public double getPricePerNight() { return pricePerNight; }
+    public void setPricePerNight(double pricePerNight) { this.pricePerNight = pricePerNight; }
 }

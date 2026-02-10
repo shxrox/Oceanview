@@ -30,11 +30,16 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public List<Reservation> findAll() throws SQLException {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM reservations ORDER BY booking_date DESC";
+
+        // JOIN reservations with rooms to get room_number and price
+        String sql = "SELECT res.*, r.room_number, r.price_per_night " +
+                "FROM reservations res " +
+                "JOIN rooms r ON res.room_id = r.id " +
+                "ORDER BY res.booking_date DESC";
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
                 Reservation res = new Reservation();
@@ -46,6 +51,10 @@ public class ReservationDAOImpl implements ReservationDAO {
                 res.setCheckIn(rs.getDate("check_in"));
                 res.setCheckOut(rs.getDate("check_out"));
                 res.setBookingDate(rs.getTimestamp("booking_date"));
+
+                // NEW: Set the joined data
+                res.setRoomNumber(rs.getString("room_number"));
+                res.setPricePerNight(rs.getDouble("price_per_night"));
 
                 list.add(res);
             }
@@ -73,4 +82,6 @@ public class ReservationDAOImpl implements ReservationDAO {
         }
         return stats;
     }
+
+
 }

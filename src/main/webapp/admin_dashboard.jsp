@@ -78,6 +78,11 @@
         <li style="margin-bottom: 15px;">
           <a href="register.jsp" class="button-link" style="display: block; text-align: center;">Register New Staff</a>
         </li>
+        <li style="margin-bottom: 15px;">
+          <a href="adminInvoices" class="button-link" style="display: block; text-align: center; background-color: #34495e;">
+            📑 Invoice Manager
+          </a>
+        </li>
         <li>
           <a href="logout" class="button-link" style="background-color: #e74c3c; display: block; text-align: center;">Logout</a>
         </li>
