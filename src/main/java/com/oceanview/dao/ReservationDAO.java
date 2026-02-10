@@ -9,7 +9,7 @@ public interface ReservationDAO {
     boolean save(Reservation reservation) throws SQLException;
     List<Reservation> findAll() throws SQLException;
     Map<String, Integer> getRoomTypeCounts() throws SQLException;
-
+    java.util.Map<String, Double> getRevenueByRoomType() throws SQLException;
     // NEW: Add this line so the Service can see it
     boolean deleteReservation(int id) throws SQLException;
 }

@@ -7,6 +7,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.Map" %>
 <%@ page import="com.oceanview.model.Reservation" %>
 <%@ page import="com.oceanview.model.User" %>
 <%
@@ -16,6 +17,7 @@
     return;
   }
   List<Reservation> list = (List<Reservation>) request.getAttribute("invoiceList");
+  Map<String, Double> revenueStats = (Map<String, Double>) request.getAttribute("revenueStats");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,16 +26,50 @@
   <title>Invoice Management - Ocean View Resort</title>
   <link rel="stylesheet" href="css/style.css">
 
-  <script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['Room Type', 'Total Revenue ($)', { role: 'style' }],
+        <%
+           if (revenueStats != null) {
+               // Define colors for bars
+               String[] colors = {"#e67e22", "#3498db", "#9b59b6", "#2ecc71"};
+               int i = 0;
+               for (Map.Entry<String, Double> entry : revenueStats.entrySet()) {
+        %>
+        ['<%= entry.getKey() %>', <%= entry.getValue() %>, '<%= colors[i++ % colors.length] %>'],
+        <%
+               }
+           } else {
+        %>
+        ['No Data', 0, 'silver']
+        <% } %>
+      ]);
+
+      var options = {
+        title: 'Total Revenue by Room Type',
+        hAxis: {title: 'Room Type'},
+        vAxis: {title: 'Revenue ($)'},
+        legend: { position: "none" }
+      };
+
+      var chart = new google.visualization.ColumnChart(document.getElementById('revenue_chart'));
+      chart.draw(data, options);
+    }
+
+    // ... existing printInvoice function ...
     function printInvoice(id, name, room, checkIn, checkOut, price) {
-      // Simple Client-Side Calculation for the link
+      // ... (same as before) ...
       var start = new Date(checkIn);
       var end = new Date(checkOut);
       var days = (end - start) / (1000 * 60 * 60 * 24);
       if (days < 1) days = 1;
       var total = days * price;
 
-      // Construct URL
       var url = "print_receipt.jsp?id=" + id +
               "&name=" + encodeURIComponent(name) +
               "&room=" + encodeURIComponent(room) +
@@ -54,6 +90,8 @@
   <div style="text-align: right; margin-bottom: 20px;">
     <a href="adminDashboard" style="text-decoration: none; color: #7f8c8d;">&larr; Back to Dashboard</a>
   </div>
+
+  <div id="revenue_chart" style="width: 100%; height: 300px; margin-bottom: 30px; border: 1px solid #ddd; background: white;"></div>
 
   <table border="1" style="width: 100%; border-collapse: collapse; text-align: left;">
     <thead>

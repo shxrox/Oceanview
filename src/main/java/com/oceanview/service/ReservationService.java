@@ -70,4 +70,14 @@ public class ReservationService {
             return false;
         }
     }
+
+    // ... inside ReservationService.java ...
+    public java.util.Map<String, Double> getRevenueStats() {
+        try {
+            return reservationDAO.getRevenueByRoomType();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new java.util.HashMap<>();
+        }
+    }
 }
