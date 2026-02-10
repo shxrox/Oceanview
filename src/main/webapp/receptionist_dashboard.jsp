@@ -35,6 +35,12 @@
         <a href="viewReservations" class="button-link" style="background-color: #f39c12;">
             View All Bookings
         </a>
+
+        <li style="margin-bottom: 15px;">
+            <a href="help.jsp" class="button-link" style="display: block; text-align: center; background-color: #f1c40f; color: #333;">
+                ❓ Help / Guide
+            </a>
+        </li>
     </div>
 
     <br><br><br>
