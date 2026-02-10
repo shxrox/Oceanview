@@ -2,36 +2,40 @@ package com.oceanview.controller;
 
 import com.oceanview.model.Reservation;
 import com.oceanview.service.ReservationService;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @WebServlet("/viewReservations")
 public class ViewReservationsServlet extends HttpServlet {
-
     private ReservationService reservationService;
 
-    @Override
-    public void init() {
-        this.reservationService = new ReservationService();
-    }
+    public void init() { this.reservationService = new ReservationService(); }
 
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Get all reservations from Service
-        List<Reservation> list = reservationService.getAllReservations();
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
 
-        // 2. Attach list to request
-        request.setAttribute("reservationList", list);
-
-        // 3. Forward to the JSP page
-        request.getRequestDispatcher("view_reservations.jsp").forward(request, response);
+        try {
+            List<Reservation> list = reservationService.getAllReservations();
+            StringBuilder json = new StringBuilder("[");
+            for (int i = 0; i < list.size(); i++) {
+                Reservation r = list.get(i);
+                json.append(String.format("{\"id\":%d,\"roomNumber\":\"%s\",\"customerName\":\"%s\",\"checkIn\":\"%s\",\"checkOut\":\"%s\"}",
+                        r.getId(), r.getRoomNumber(), r.getCustomerName(), r.getCheckIn(), r.getCheckOut()));
+                if (i < list.size() - 1) json.append(",");
+            }
+            json.append("]");
+            out.print(json.toString());
+        } catch (Exception e) {
+            out.print("[]");
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.oceanview.util;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,30 +7,26 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBConnection {
-
-    private static final Properties properties = new Properties();
+    private static Properties props = new Properties();
 
     static {
         try (InputStream input = DBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
             if (input == null) {
                 System.out.println("Sorry, unable to find db.properties");
-
             } else {
-                properties.load(input);
-                // Load the driver class dynamically
-                Class.forName(properties.getProperty("db.driver"));
+                props.load(input);
+                Class.forName(props.getProperty("db.driver"));
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error loading database configuration", e);
         }
     }
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(
-                properties.getProperty("db.url"),
-                properties.getProperty("db.user"),
-                properties.getProperty("db.password")
+                props.getProperty("db.url"),
+                props.getProperty("db.user"),
+                props.getProperty("db.password")
         );
     }
 }

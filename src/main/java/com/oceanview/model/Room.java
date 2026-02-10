@@ -3,12 +3,14 @@ package com.oceanview.model;
 public class Room {
     private int id;
     private String roomNumber;
-    private String roomType;
+    private String roomType; // "Single", "Double", "Suite"
     private double pricePerNight;
     private boolean isAvailable;
 
+    // Default Constructor
     public Room() {}
 
+    // Full Constructor
     public Room(int id, String roomNumber, String roomType, double pricePerNight, boolean isAvailable) {
         this.id = id;
         this.roomNumber = roomNumber;

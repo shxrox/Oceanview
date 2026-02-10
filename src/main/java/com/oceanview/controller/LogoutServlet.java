@@ -7,23 +7,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @WebServlet("/logout")
 public class LogoutServlet extends HttpServlet {
-
-    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Get the current session
-        HttpSession session = request.getSession(false); // false = don't create if not exists
-
-        // 2. Invalidate it (Clear all data)
+        response.setContentType("application/json");
+        HttpSession session = request.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-
-        // 3. Redirect back to Login Page
-        response.sendRedirect("index.jsp");
+        response.getWriter().print("{\"status\":\"success\"}");
     }
 }

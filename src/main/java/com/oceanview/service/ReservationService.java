@@ -1,83 +1,75 @@
 package com.oceanview.service;
 
-import com.oceanview.dao.ReservationDAO;
-import com.oceanview.dao.ReservationDAOImpl;
-import com.oceanview.dao.RoomDAO;
-import com.oceanview.dao.RoomDAOImpl;
+// FIXED IMPORTS
+import com.oceanview.repository.ReservationRepository;
+import com.oceanview.repository.ReservationRepositoryImpl;
 import com.oceanview.model.Reservation;
-import com.oceanview.util.EmailUtility;
 
 import java.sql.Date;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ReservationService {
-
-    private ReservationDAO reservationDAO;
-    private RoomDAO roomDAO;
+    private ReservationRepository reservationRepository;
+    private EmailService emailService;
 
     public ReservationService() {
-        this.reservationDAO = new ReservationDAOImpl();
-        this.roomDAO = new RoomDAOImpl();
+        this.reservationRepository = new ReservationRepositoryImpl();
+        this.emailService = new EmailService();
     }
 
-    public boolean processBooking(int roomId, String customerName, String customerEmail, String customerPhone, Date checkIn, Date checkOut) {
+    public boolean processBooking(int roomId, String name, String email, String phone, Date checkIn, Date checkOut) {
         try {
-            Reservation res = new Reservation(roomId, customerName, customerEmail, customerPhone, checkIn, checkOut);
-            boolean isSaved = reservationDAO.save(res);
+            Reservation res = new Reservation(roomId, name, email, phone, checkIn, checkOut);
+            boolean isSaved = reservationRepository.save(res);
 
             if (isSaved) {
-                String subject = "Booking Confirmation - Ocean View Resort";
-                String message = "Dear " + customerName + ",\n\n" +
-                        "Your reservation for Room " + roomId + " has been confirmed.\n\n" +
-                        "Check-in: " + checkIn + "\n" +
-                        "Check-out: " + checkOut + "\n\n";
-
-                new Thread(() -> EmailUtility.sendEmail(customerEmail, subject, message)).start();
+                emailService.sendBookingConfirmation(res);
                 return true;
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public List<Reservation> getAllReservations() {
-        try {
-            return reservationDAO.findAll();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public Map<String, Integer> getRoomTypeStats() {
-        try {
-            return reservationDAO.getRoomTypeCounts();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return new HashMap<>();
-        }
-    }
-
-    public boolean cancelReservation(int id) {
-        try {
-            return reservationDAO.deleteReservation(id);
+            return false;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    // ... inside ReservationService.java ...
-    public java.util.Map<String, Double> getRevenueStats() {
+    public List<Reservation> getAllReservations() {
         try {
-            return reservationDAO.getRevenueByRoomType();
+            return reservationRepository.findAll();
         } catch (SQLException e) {
             e.printStackTrace();
-            return new java.util.HashMap<>();
+            return Collections.emptyList();
+        }
+    }
+
+    public boolean cancelReservation(int id) {
+        try {
+            return reservationRepository.delete(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Map<String, Integer> getRoomTypeCounts() {
+        try {
+            return reservationRepository.getRoomTypeCounts();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
+    }
+
+    public Map<String, Double> getRevenueStats() {
+        try {
+            return reservationRepository.getRevenueByRoomType();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return new HashMap<>();
         }
     }
 }

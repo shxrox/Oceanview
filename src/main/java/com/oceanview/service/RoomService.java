@@ -1,40 +1,37 @@
 package com.oceanview.service;
 
-import com.oceanview.dao.RoomDAO;
-import com.oceanview.dao.RoomDAOImpl;
+// FIXED IMPORTS
+import com.oceanview.repository.RoomRepository;
+import com.oceanview.repository.RoomRepositoryImpl;
 import com.oceanview.model.Room;
 
-import java.sql.Date; // Make sure this is imported
+import java.sql.Date;
 import java.sql.SQLException;
-import java.util.ArrayList; // Import ArrayList
+import java.util.Collections;
 import java.util.List;
 
 public class RoomService {
-
-    private RoomDAO roomDAO;
+    private RoomRepository roomRepository;
 
     public RoomService() {
-        this.roomDAO = new RoomDAOImpl();
+        this.roomRepository = new RoomRepositoryImpl();
     }
 
-    // OLD METHOD (Removed or Updated)
-    // We removed 'findAllAvailable()' because it doesn't know about dates.
-
-    // NEW METHOD: Validates availability based on dates
     public List<Room> getAvailableRooms(Date checkIn, Date checkOut) {
         try {
-            // Call the NEW method in DAO
-            return roomDAO.findAvailableRoomsByDate(checkIn, checkOut);
+            if (checkOut.before(checkIn) || checkOut.equals(checkIn)) {
+                return Collections.emptyList();
+            }
+            return roomRepository.findAvailableRooms(checkIn, checkOut);
         } catch (SQLException e) {
             e.printStackTrace();
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 
-    // Method to get a single room (for booking details)
     public Room getRoomById(int id) {
         try {
-            return roomDAO.findById(id);
+            return roomRepository.findById(id);
         } catch (SQLException e) {
             e.printStackTrace();
             return null;

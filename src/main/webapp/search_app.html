@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find Rooms</title>
+  <style>
+    body { background: #f4f6f7; padding: 30px; font-family: sans-serif; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; background: #ecf0f1; padding: 15px; border-radius: 5px; }
+    input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+
+    .room-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+    .price { color: #27ae60; font-weight: bold; font-size: 1.2em; }
+    .book-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>Find Available Rooms</h2>
+    <a href="receptionist_dashboard.html" style="color: #7f8c8d; text-decoration: none;">&larr; Back</a>
+  </div>
+
+  <div class="search-bar">
+    <input type="date" id="checkIn">
+    <input type="date" id="checkOut">
+    <button onclick="searchRooms()">Search Rooms</button>
+  </div>
+
+  <div id="results">
+    <p style="text-align: center; color: #95a5a6;">Select dates to begin.</p>
+  </div>
+</div>
+
+<script>
+  async function searchRooms() {
+    const checkIn = document.getElementById('checkIn').value;
+    const checkOut = document.getElementById('checkOut').value;
+    const results = document.getElementById('results');
+
+    if (!checkIn || !checkOut) { alert("Select both dates!"); return; }
+
+    results.innerHTML = "Loading...";
+
+    try {
+      const response = await fetch(`searchRooms?checkIn=${checkIn}&checkOut=${checkOut}`);
+      const rooms = await response.json();
+      results.innerHTML = "";
+
+      if (rooms.length === 0) results.innerHTML = "<p>No rooms available.</p>";
+      else {
+        rooms.forEach(r => {
+          results.innerHTML += `
+                        <div class="room-card">
+                            <div>
+                                <h3>Room ${r.number}</h3>
+                                <p>${r.type} Suite</p>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="price">$${r.price}</div>
+                                <button class="book-btn" onclick="bookRoom(${r.id}, '${r.number}', ${r.price})">Book Now</button>
+                            </div>
+                        </div>`;
+        });
+      }
+    } catch (e) { results.innerHTML = "Error fetching data."; }
+  }
+
+  function bookRoom(id, num, price) {
+    const inDate = document.getElementById('checkIn').value;
+    const outDate = document.getElementById('checkOut').value;
+    window.location.href = `booking_app.html?id=${id}&room=${num}&price=${price}&in=${inDate}&out=${outDate}`;
+  }
+</script>
+
+</body>
+</html>

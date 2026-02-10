@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 public class Reservation {
+    // Database Fields
     private int id;
     private int roomId;
     private String customerName;
@@ -13,13 +14,14 @@ public class Reservation {
     private Date checkOut;
     private Timestamp bookingDate;
 
-    // NEW FIELDS for Invoice Display
+    // JOINED Fields (from Room table) - Needed for Invoices/Dashboard
     private String roomNumber;
     private double pricePerNight;
 
-    // Constructors
+    // Default Constructor
     public Reservation() {}
 
+    // Constructor for Creating a New Booking
     public Reservation(int roomId, String customerName, String customerEmail, String customerPhone, Date checkIn, Date checkOut) {
         this.roomId = roomId;
         this.customerName = customerName;
@@ -54,7 +56,7 @@ public class Reservation {
     public Timestamp getBookingDate() { return bookingDate; }
     public void setBookingDate(Timestamp bookingDate) { this.bookingDate = bookingDate; }
 
-    // NEW Getters/Setters
+    // --- Extra Getters/Setters for Invoice Data ---
     public String getRoomNumber() { return roomNumber; }
     public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
 

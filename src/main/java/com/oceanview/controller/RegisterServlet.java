@@ -7,12 +7,11 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/register")
+public class RegisterServlet extends HttpServlet {
     private UserService userService;
 
     public void init() { this.userService = new UserService(); }
@@ -23,20 +22,19 @@ public class LoginServlet extends HttpServlet {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
 
+        String name = request.getParameter("name");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
         try {
-            User user = userService.login(email, password);
-            if (user != null) {
-                HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                out.print("{\"status\":\"success\", \"role\":\"" + user.getRole() + "\"}");
+            User newUser = new User(name, email, password, "RECEPTIONIST");
+            boolean saved = userService.registerUser(newUser);
+            if (saved) {
+                out.print("{\"status\":\"success\"}");
             } else {
-                out.print("{\"status\":\"error\", \"message\":\"Invalid email or password\"}");
+                out.print("{\"status\":\"error\", \"message\":\"Email already exists\"}");
             }
         } catch (Exception e) {
-            e.printStackTrace();
             out.print("{\"status\":\"error\", \"message\":\"Server error\"}");
         }
     }
