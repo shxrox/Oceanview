@@ -42,6 +42,7 @@
             <th style="padding: 10px;">Customer</th>
             <th style="padding: 10px;">Dates (In / Out)</th> <th style="padding: 10px;">Phone</th>
             <th style="padding: 10px;">Date Booked</th>
+            <th style="padding: 10px;">Action</th>
         </tr>
         </thead>
         <tbody>
@@ -64,6 +65,14 @@
 
             <td style="padding: 10px;"><%= res.getCustomerPhone() %></td>
             <td style="padding: 10px;"><%= res.getBookingDate() %></td>
+            <td style="padding: 10px;">
+                <form action="cancelReservation" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking? This cannot be undone.');">
+                    <input type="hidden" name="id" value="<%= res.getId() %>">
+                    <button type="submit" style="background-color: #e74c3c; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">
+                        ✖ Cancel
+                    </button>
+                </form>
+            </td>
         </tr>
         <%
             }

@@ -6,6 +6,8 @@ import com.oceanview.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReservationDAOImpl implements ReservationDAO {
 
@@ -31,7 +33,6 @@ public class ReservationDAOImpl implements ReservationDAO {
     public List<Reservation> findAll() throws SQLException {
         List<Reservation> list = new ArrayList<>();
 
-        // JOIN reservations with rooms to get room_number and price
         String sql = "SELECT res.*, r.room_number, r.price_per_night " +
                 "FROM reservations res " +
                 "JOIN rooms r ON res.room_id = r.id " +
@@ -51,19 +52,16 @@ public class ReservationDAOImpl implements ReservationDAO {
                 res.setCheckIn(rs.getDate("check_in"));
                 res.setCheckOut(rs.getDate("check_out"));
                 res.setBookingDate(rs.getTimestamp("booking_date"));
-
-                // NEW: Set the joined data
                 res.setRoomNumber(rs.getString("room_number"));
                 res.setPricePerNight(rs.getDouble("price_per_night"));
-
                 list.add(res);
             }
         }
         return list;
     }
 
-    public java.util.Map<String, Integer> getRoomTypeCounts() throws SQLException {
-        java.util.Map<String, Integer> stats = new java.util.HashMap<>();
+    public Map<String, Integer> getRoomTypeCounts() throws SQLException {
+        Map<String, Integer> stats = new HashMap<>();
 
         String sql = "SELECT r.room_type, COUNT(res.id) as total " +
                 "FROM reservations res " +
@@ -75,13 +73,20 @@ public class ReservationDAOImpl implements ReservationDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                String type = rs.getString("room_type");
-                int count = rs.getInt("total");
-                stats.put(type, count);
+                stats.put(rs.getString("room_type"), rs.getInt("total"));
             }
         }
         return stats;
     }
 
+    public boolean deleteReservation(int id) throws SQLException {
+        String sql = "DELETE FROM reservations WHERE id = ?";
 
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
 }
