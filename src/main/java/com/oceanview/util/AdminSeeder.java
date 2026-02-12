@@ -7,33 +7,40 @@ import java.sql.SQLException;
 
 public class AdminSeeder {
     public static void main(String[] args) {
-        String sql = "INSERT INTO users (username, password, role, full_name, email) VALUES (?, ?, ?, ?, ?)";
+        // SQL to insert the new admin
+        String sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        // SQL to delete the old admin (optional, keeps DB clean)
+        String deleteSql = "DELETE FROM users WHERE email = 'admin@oceanview.com'";
 
-            // 1. Define Admin Credentials
-            String rawPassword = "admin123"; // This is the password you will use to login
-            String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+        try (Connection conn = DBConnection.getConnection()) {
 
-            // 2. Set values in the query
-            stmt.setString(1, "admin");
-            stmt.setString(2, hashedPassword);
-            stmt.setString(3, "ADMIN"); // Must match the ENUM in database
-            stmt.setString(4, "System Administrator");
-            stmt.setString(5, "admin@oceanview.com");
+            // 1. Remove old admin if exists (to avoid confusion)
+            try (PreparedStatement delStmt = conn.prepareStatement(deleteSql)) {
+                delStmt.executeUpdate();
+            }
 
-            // 3. Execute
-            int rowsInserted = stmt.executeUpdate();
-            if (rowsInserted > 0) {
-                System.out.println("SUCCESS: Admin user created!");
-                System.out.println("Username: admin");
-                System.out.println("Password: " + rawPassword);
+            // 2. Insert NEW Admin
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                String rawPassword = "admin123";
+                String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
+
+                stmt.setString(1, "System Administrator");
+                stmt.setString(2, "admin@gmail.com");  // <--- UPDATED EMAIL
+                stmt.setString(3, hashedPassword);
+                stmt.setString(4, "ADMIN");
+
+                int rows = stmt.executeUpdate();
+                if (rows > 0) {
+                    System.out.println("✅ SUCCESS: New Admin user created.");
+                    System.out.println("📧 Email: admin@gmail.com");
+                    System.out.println("🔑 Password: " + rawPassword);
+                }
             }
 
         } catch (SQLException e) {
-            if (e.getErrorCode() == 1062) { // Duplicate entry error code in MySQL
-                System.out.println("Admin user already exists.");
+            if (e.getErrorCode() == 1062) {
+                System.out.println("⚠️ Admin with this email already exists.");
             } else {
                 e.printStackTrace();
             }

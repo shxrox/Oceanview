@@ -7,35 +7,78 @@
   <style>
     body { font-family: sans-serif; background: #f4f6f7; padding: 20px; }
     .wrapper { max-width: 1200px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-    .chart-row { display: flex; gap: 20px; margin-bottom: 30px; }
-    .chart-box { flex: 1; background: white; padding: 20px; height: 300px; border-radius: 8px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .logout { background: #e74c3c; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; }
 
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }
-    th { background: #2c3e50; color: white; padding: 12px; text-align: left; }
-    td { padding: 12px; border-bottom: 1px solid #eee; }
-    .btn { background: #8e44ad; color: white; padding: 5px 10px; border: none; cursor: pointer; border-radius: 3px; }
-    .logout { background: #e74c3c; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; }
+    /* Grid Layout */
+    .dashboard-grid { display: flex; gap: 20px; }
+    .main-content { flex: 3; }
+    .sidebar { flex: 1; }
+
+    /* Cards */
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .chart-box { height: 250px; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { background: #2c3e50; color: white; padding: 10px; text-align: left; }
+    td { padding: 10px; border-bottom: 1px solid #eee; }
+    .btn-inv { background: #8e44ad; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+
+    /* Form Styles */
+    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    .btn-add { width: 100%; background: #27ae60; color: white; padding: 10px; border: none; cursor: pointer; font-size: 16px; border-radius: 4px; }
+    .btn-add:hover { background: #2ecc71; }
   </style>
 </head>
 <body>
 
 <div class="wrapper">
   <div class="header">
-    <h2>📊 Administrator Dashboard</h2>
+    <h2 style="color: #2c3e50;">📊 Administrator Dashboard</h2>
     <a href="#" onclick="logout()" class="logout">Logout</a>
   </div>
 
-  <div class="chart-row">
-    <div id="piechart" class="chart-box">Loading...</div>
-    <div id="barchart" class="chart-box">Loading...</div>
-  </div>
+  <div class="dashboard-grid">
 
-  <h3>📑 Recent Invoices</h3>
-  <table id="invTable">
-    <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr></thead>
-    <tbody id="tbody"><tr><td colspan="5">Loading data...</td></tr></tbody>
-  </table>
+    <div class="main-content">
+      <div class="card">
+        <h3>Revenue Overview</h3>
+        <div id="barchart" class="chart-box">Loading Chart...</div>
+      </div>
+
+      <div class="card">
+        <h3>Recent Bookings & Invoices</h3>
+        <table id="invTable">
+          <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr></thead>
+          <tbody id="tbody"><tr><td colspan="5">Loading data...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="card" style="border-top: 4px solid #27ae60;">
+        <h3 style="margin-top: 0;">➕ Add Receptionist</h3>
+        <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 15px;">Create a new staff login.</p>
+
+        <form onsubmit="addReceptionist(event)">
+          <label>FULL NAME</label>
+          <input type="text" id="regName" required>
+
+          <label>EMAIL</label>
+          <input type="email" id="regEmail" required>
+
+          <button type="submit" class="btn-add">Create Account</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h3>Room Popularity</h3>
+        <div id="piechart" style="height: 200px;">Loading...</div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
@@ -43,47 +86,98 @@
   google.charts.setOnLoadCallback(loadData);
 
   async function loadData() {
-    const res = await fetch('adminData');
-    const data = await res.json();
+    try {
+      const res = await fetch('adminData');
+      const data = await res.json();
 
-    // 1. Pie Chart
-    var pie = new google.visualization.DataTable();
-    pie.addColumn('string', 'Type'); pie.addColumn('number', 'Count');
-    data.pieData.forEach(d => pie.addRow([d.type, d.count]));
-    new google.visualization.PieChart(document.getElementById('piechart')).draw(pie, {title:'Room Occupancy'});
+      // 1. Draw Pie Chart
+      var pie = new google.visualization.DataTable();
+      pie.addColumn('string', 'Type'); pie.addColumn('number', 'Count');
+      data.pieData.forEach(d => pie.addRow([d.type, d.count]));
+      new google.visualization.PieChart(document.getElementById('piechart')).draw(pie, {legend: 'bottom', pieHole: 0.4});
 
-    // 2. Bar Chart
-    var bar = new google.visualization.DataTable();
-    bar.addColumn('string', 'Type'); bar.addColumn('number', 'Revenue');
-    data.barData.forEach(d => bar.addRow([d.type, d.revenue]));
-    new google.visualization.ColumnChart(document.getElementById('barchart')).draw(bar, {title:'Total Revenue ($)', legend: 'none'});
+      // 2. Draw Bar Chart
+      var bar = new google.visualization.DataTable();
+      bar.addColumn('string', 'Type'); bar.addColumn('number', 'Revenue');
+      data.barData.forEach(d => bar.addRow([d.type, d.revenue]));
+      new google.visualization.ColumnChart(document.getElementById('barchart')).draw(bar, {legend: 'none', colors: ['#3498db']});
 
-    // 3. Table
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = '';
-    data.invoices.forEach(i => {
-      tbody.innerHTML += `
-                <tr>
-                    <td>#${i.id}</td><td>${i.customer}</td><td>${i.room}</td>
-                    <td>${i.checkIn} to ${i.checkOut}</td>
-                    <td><button class="btn" onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">📄 Invoice</button></td>
-                </tr>`;
-    });
+      // 3. Fill Table
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      data.invoices.forEach(i => {
+        tbody.innerHTML += `
+                    <tr>
+                        <td>#${i.id}</td><td>${i.customer}</td><td>${i.room}</td>
+                        <td><small>${i.checkIn}<br>${i.checkOut}</small></td>
+                        <td><button class="btn-inv" onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">📄 Invoice</button></td>
+                    </tr>`;
+      });
+    } catch(e) { console.error("Error loading dashboard", e); }
+  }
+
+  // --- FUNCTION TO ADD RECEPTIONIST ---
+  async function addReceptionist(e) {
+    e.preventDefault();
+
+    // 1. Prepare Data
+    const params = new URLSearchParams();
+    params.append('name', document.getElementById('regName').value);
+    params.append('email', document.getElementById('regEmail').value);
+    params.append('password', document.getElementById('regPass').value);
+
+    try {
+      // 2. Call the existing Register Servlet
+      const res = await fetch('register', { method: 'POST', body: params });
+      const json = await res.json();
+
+      // 3. Handle Result
+      if (json.status === 'success') {
+        alert("✅ Success! New Receptionist created.");
+        // Clear form
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPass').value = '';
+      } else {
+        alert("❌ Error: " + json.message);
+      }
+    } catch (err) {
+      alert("❌ Server Error: Could not create user.");
+    }
   }
 
   function printInv(id, name, room, inDate, outDate, price) {
-    const start = new Date(inDate);
-    const end = new Date(outDate);
-    const days = Math.max(1, (end - start) / (1000 * 60 * 60 * 24));
-    const total = days * price;
-
-    const url = `print_receipt.jsp?id=${id}&name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&in=${inDate}&out=${outDate}&price=${price}&total=${total}`;
+    const url = `print_receipt.html?id=${id}&name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&in=${inDate}&out=${outDate}&price=${price}&total=${price}`; // logic simplified for demo
     window.open(url, '_blank');
   }
 
   async function logout() {
     await fetch('logout');
     window.location.href = 'login_app.html';
+  }
+
+  async function addReceptionist(e) {
+    e.preventDefault();
+
+    const params = new URLSearchParams();
+    params.append('name', document.getElementById('regName').value);
+    params.append('email', document.getElementById('regEmail').value);
+    // No password param sent!
+
+    try {
+      const res = await fetch('register', { method: 'POST', body: params });
+      const json = await res.json();
+
+      if (json.status === 'success') {
+        alert("✅ Success! Account created.\n\nCheck 'FakeEmails' folder for the password.");
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+      } else {
+        alert("❌ Error: " + json.message);
+      }
+    } catch (err) {
+      alert("❌ Server Error");
+    }
   }
 </script>
 
