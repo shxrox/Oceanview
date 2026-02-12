@@ -7,40 +7,67 @@
     body { background: #f4f6f7; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
     .card { background: white; padding: 30px; border-radius: 8px; width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .summary { background: #ecf0f1; padding: 15px; margin-bottom: 20px; border-radius: 5px; font-size: 14px; }
+    .total-row { font-size: 1.2em; font-weight: bold; color: #2c3e50; border-top: 1px solid #bdc3c7; margin-top: 10px; padding-top: 10px; }
     input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background: #219150; }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>Guest Details</h2>
+  <h2>Confirm Booking</h2>
+
   <div class="summary">
     <p><strong>Room:</strong> <span id="sRoom"></span></p>
-    <p><strong>Dates:</strong> <span id="sDates"></span></p>
-    <p><strong>Price:</strong> $<span id="sPrice"></span></p>
+    <p><strong>Check-In:</strong> <span id="sIn"></span></p>
+    <p><strong>Check-Out:</strong> <span id="sOut"></span></p>
+    <p><strong>Duration:</strong> <span id="sDays"></span> nights</p>
+    <p><strong>Price per Night:</strong> $<span id="sPrice"></span></p>
+
+    <div class="total-row">
+      TOTAL: $<span id="sTotal"></span>
+    </div>
   </div>
 
   <form onsubmit="confirmBooking(event)">
     <input type="text" id="name" placeholder="Guest Name" required>
     <input type="email" id="email" placeholder="Email Address" required>
     <input type="tel" id="phone" placeholder="Phone Number" required>
-    <button type="submit" id="btn">Confirm Reservation</button>
+    <button type="submit" id="btn">Confirm & Pay</button>
   </form>
+
   <div style="text-align: center; margin-top: 10px;">
     <a href="search_app.html" style="color: #7f8c8d; text-decoration: none;">Cancel</a>
   </div>
 </div>
 
 <script>
+  // 1. GET PARAMS FROM URL
   const params = new URLSearchParams(window.location.search);
+  const pricePerNight = parseFloat(params.get('price'));
+  const checkInDate = new Date(params.get('in'));
+  const checkOutDate = new Date(params.get('out'));
+
+  // 2. CALCULATE DAYS
+  // (Difference in Time / (1000 * 3600 * 24))
+  const diffTime = Math.abs(checkOutDate - checkInDate);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const totalAmount = diffDays * pricePerNight;
+
+  // 3. DISPLAY DATA
   document.getElementById('sRoom').innerText = params.get('room');
-  document.getElementById('sPrice').innerText = params.get('price');
-  document.getElementById('sDates').innerText = `${params.get('in')} to ${params.get('out')}`;
+  document.getElementById('sIn').innerText = params.get('in');
+  document.getElementById('sOut').innerText = params.get('out');
+  document.getElementById('sDays').innerText = diffDays;
+  document.getElementById('sPrice').innerText = pricePerNight.toFixed(2);
+  document.getElementById('sTotal').innerText = totalAmount.toFixed(2);
 
   async function confirmBooking(e) {
     e.preventDefault();
-    document.getElementById('btn').innerText = "Processing...";
+    const btn = document.getElementById('btn');
+    btn.innerText = "Processing...";
+    btn.disabled = true;
 
     const data = new URLSearchParams();
     data.append('roomId', params.get('id'));
@@ -49,15 +76,23 @@
     data.append('name', document.getElementById('name').value);
     data.append('email', document.getElementById('email').value);
     data.append('phone', document.getElementById('phone').value);
+    data.append('totalPrice', totalAmount); // Send Total to Server (Optional, server should recalc)
 
-    const res = await fetch('bookRoom', { method: 'POST', body: data });
-    const json = await res.json();
+    try {
+      const res = await fetch('bookRoom', { method: 'POST', body: data });
+      const json = await res.json();
 
-    if(json.status === 'success') {
-      alert("Booking Confirmed! Email Sent.");
-      window.location.href = 'receptionist_dashboard.html';
-    } else {
-      alert("Error: " + json.message);
+      if(json.status === 'success') {
+        // Redirect to Receipt Printer
+        const name = document.getElementById('name').value;
+        const url = `print_receipt.html?id=${params.get('id')}&name=${encodeURIComponent(name)}&room=${params.get('room')}&in=${params.get('in')}&out=${params.get('out')}&price=${pricePerNight}&total=${totalAmount}`;
+        window.location.href = url;
+      } else {
+        alert("Error: " + json.message);
+        btn.disabled = false;
+      }
+    } catch (err) {
+      alert("Server Error");
     }
   }
 </script>
