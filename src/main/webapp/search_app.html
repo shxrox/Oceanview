@@ -5,14 +5,19 @@
   <title>Find Rooms</title>
   <style>
     body { background: #f4f6f7; padding: 30px; font-family: sans-serif; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
-    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; background: #ecf0f1; padding: 15px; border-radius: 5px; }
-    input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-    button { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; background: #ecf0f1; padding: 15px; border-radius: 5px; align-items: flex-end; }
+    .field-group { flex: 1; display: flex; flex-direction: column; }
+    label { font-size: 12px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; }
+    input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    button:hover { background: #2980b9; }
 
-    .room-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+    .room-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; transition: 0.2s; }
+    .room-card:hover { border-color: #3498db; background: #fdfdfd; }
     .price { color: #27ae60; font-weight: bold; font-size: 1.2em; }
     .book-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; }
+    .book-btn:hover { background: #219150; }
   </style>
 </head>
 <body>
@@ -24,8 +29,14 @@
   </div>
 
   <div class="search-bar">
-    <input type="date" id="checkIn">
-    <input type="date" id="checkOut">
+    <div class="field-group">
+      <label>Check-In Date</label>
+      <input type="date" id="checkIn">
+    </div>
+    <div class="field-group">
+      <label>Check-Out Date</label>
+      <input type="date" id="checkOut">
+    </div>
     <button onclick="searchRooms()">Search Rooms</button>
   </div>
 
@@ -35,12 +46,51 @@
 </div>
 
 <script>
+  // --- 1. INITIALIZE DATE CONSTRAINTS ---
+  window.onload = function() {
+    const checkIn = document.getElementById('checkIn');
+    const checkOut = document.getElementById('checkOut');
+
+    // Get Today's Date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+
+    // Rule 1: Prevent Past Dates
+    checkIn.setAttribute('min', today);
+    checkOut.setAttribute('min', today);
+
+    // Rule 2: Update Check-Out Constraint when Check-In Changes
+    checkIn.addEventListener('change', function() {
+      if (this.value) {
+        // Determine the next day
+        const selectedDate = new Date(this.value);
+        selectedDate.setDate(selectedDate.getDate() + 1);
+        const nextDay = selectedDate.toISOString().split('T')[0];
+
+        // Set Check-Out MIN to be at least one day after Check-In
+        checkOut.setAttribute('min', nextDay);
+
+        // If the current checkout is now invalid (before checkin), clear it
+        if (checkOut.value && checkOut.value < nextDay) {
+          checkOut.value = "";
+        }
+      }
+    });
+  }
+
   async function searchRooms() {
     const checkIn = document.getElementById('checkIn').value;
     const checkOut = document.getElementById('checkOut').value;
     const results = document.getElementById('results');
 
-    if (!checkIn || !checkOut) { alert("Select both dates!"); return; }
+    // Validation: Ensure Check-Out is AFTER Check-In
+    if (!checkIn || !checkOut) {
+      alert("Please select both dates!");
+      return;
+    }
+    if (checkOut <= checkIn) {
+      alert("Check-Out date must be after Check-In date!");
+      return;
+    }
 
     results.innerHTML = "Loading...";
 
@@ -49,17 +99,17 @@
       const rooms = await response.json();
       results.innerHTML = "";
 
-      if (rooms.length === 0) results.innerHTML = "<p>No rooms available.</p>";
+      if (rooms.length === 0) results.innerHTML = "<p>No rooms available for these dates.</p>";
       else {
         rooms.forEach(r => {
           results.innerHTML += `
                         <div class="room-card">
                             <div>
                                 <h3>Room ${r.number}</h3>
-                                <p>${r.type} Suite</p>
+                                <p style="color: #666;">${r.type} Suite</p>
                             </div>
                             <div style="text-align: right;">
-                                <div class="price">$${r.price}</div>
+                                <div class="price">$${r.price} <span style="font-size:0.6em; color:#999;">/night</span></div>
                                 <button class="book-btn" onclick="bookRoom(${r.id}, '${r.number}', ${r.price})">Book Now</button>
                             </div>
                         </div>`;
