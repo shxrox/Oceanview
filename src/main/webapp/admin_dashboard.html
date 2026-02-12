@@ -7,177 +7,223 @@
   <style>
     body { font-family: sans-serif; background: #f4f6f7; padding: 20px; }
     .wrapper { max-width: 1200px; margin: 0 auto; }
+
+    /* Header & Nav */
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .logout { background: #e74c3c; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    .tab-btn { background: none; border: none; font-size: 16px; padding: 10px 20px; cursor: pointer; color: #7f8c8d; font-weight: bold; }
+    .tab-btn.active { color: #3498db; border-bottom: 3px solid #3498db; }
+    .logout { background: #e74c3c; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 14px; }
 
-    /* Grid Layout */
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Grid & Cards */
     .dashboard-grid { display: flex; gap: 20px; }
-    .main-content { flex: 3; }
-    .sidebar { flex: 1; }
-
-    /* Cards */
+    .col-left { flex: 3; }
+    .col-right { flex: 1; }
     .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
     .chart-box { height: 250px; }
 
-    /* Table */
+    /* Tables */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th { background: #2c3e50; color: white; padding: 10px; text-align: left; }
     td { padding: 10px; border-bottom: 1px solid #eee; }
-    .btn-inv { background: #8e44ad; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
 
-    /* Form Styles */
-    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    .btn-add { width: 100%; background: #27ae60; color: white; padding: 10px; border: none; cursor: pointer; font-size: 16px; border-radius: 4px; }
-    .btn-add:hover { background: #2ecc71; }
+    /* Buttons & Badges */
+    .btn-inv { background: #8e44ad; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+    .btn-del { background: #c0392b; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+    .btn-add { background: #2980b9; color: white; padding: 10px; width: 100%; border: none; cursor: pointer; border-radius: 4px; margin-top: 10px;}
+
+    .role-badge { padding: 3px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+    .role-ADMIN { background: #8e44ad; color: white; }
+    .role-RECEPTIONIST { background: #27ae60; color: white; }
+
+    input { width: 100%; padding: 10px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
   </style>
 </head>
 <body>
 
 <div class="wrapper">
   <div class="header">
-    <h2 style="color: #2c3e50;">📊 Administrator Dashboard</h2>
+    <h2 style="color: #2c3e50;">Admin Control Center</h2>
     <a href="#" onclick="logout()" class="logout">Logout</a>
   </div>
 
-  <div class="dashboard-grid">
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('analytics')">📊 Analytics & Invoices</button>
+    <button class="tab-btn" onclick="switchTab('users')">👥 User Management</button>
+  </div>
 
-    <div class="main-content">
-      <div class="card">
-        <h3>Revenue Overview</h3>
-        <div id="barchart" class="chart-box">Loading Chart...</div>
+  <div id="analytics" class="section active">
+    <div class="dashboard-grid">
+      <div class="col-left">
+        <div class="card">
+          <h3>Revenue Overview</h3>
+          <div id="barchart" class="chart-box">Loading Chart...</div>
+        </div>
+
+        <div class="card">
+          <h3>Recent Bookings & Invoices</h3>
+          <table>
+            <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr></thead>
+            <tbody id="invBody"><tr><td colspan="5">Loading data...</td></tr></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>Recent Bookings & Invoices</h3>
-        <table id="invTable">
-          <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr></thead>
-          <tbody id="tbody"><tr><td colspan="5">Loading data...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="sidebar">
-      <div class="card" style="border-top: 4px solid #27ae60;">
-        <h3 style="margin-top: 0;">➕ Add Receptionist</h3>
-        <p style="font-size: 13px; color: #7f8c8d; margin-bottom: 15px;">Create a new staff login.</p>
-
-        <form onsubmit="addReceptionist(event)">
-          <label>FULL NAME</label>
-          <input type="text" id="regName" required>
-
-          <label>EMAIL</label>
-          <input type="email" id="regEmail" required>
-
-          <button type="submit" class="btn-add">Create Account</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <h3>Room Popularity</h3>
-        <div id="piechart" style="height: 200px;">Loading...</div>
+      <div class="col-right">
+        <div class="card">
+          <h3>Room Popularity</h3>
+          <div id="piechart" style="height: 200px;">Loading...</div>
+        </div>
       </div>
     </div>
+  </div>
 
+  <div id="users" class="section">
+    <div class="dashboard-grid">
+      <div class="col-right">
+        <div class="card" style="border-top: 4px solid #2980b9;">
+          <h3>➕ Add User</h3>
+          <form onsubmit="addUser(event)">
+            <label>Name</label><input type="text" id="uName" required>
+            <label>Email</label><input type="email" id="uEmail" required>
+            <button type="submit" class="btn-add">Create User</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="col-left">
+        <div class="card">
+          <h3>System Users</h3>
+          <table id="userTable">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
+            <tbody id="userBody"><tr><td colspan="5">Loading users...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
   google.charts.load('current', {'packages':['corechart']});
-  google.charts.setOnLoadCallback(loadData);
+  google.charts.setOnLoadCallback(loadAnalytics);
 
-  async function loadData() {
+  // Load Users immediately too
+  loadUsers();
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // --- 1. LOAD ANALYTICS & INVOICES ---
+  async function loadAnalytics() {
     try {
       const res = await fetch('adminData');
       const data = await res.json();
 
-      // 1. Draw Pie Chart
+      // Charts
       var pie = new google.visualization.DataTable();
       pie.addColumn('string', 'Type'); pie.addColumn('number', 'Count');
       data.pieData.forEach(d => pie.addRow([d.type, d.count]));
       new google.visualization.PieChart(document.getElementById('piechart')).draw(pie, {legend: 'bottom', pieHole: 0.4});
 
-      // 2. Draw Bar Chart
       var bar = new google.visualization.DataTable();
       bar.addColumn('string', 'Type'); bar.addColumn('number', 'Revenue');
       data.barData.forEach(d => bar.addRow([d.type, d.revenue]));
       new google.visualization.ColumnChart(document.getElementById('barchart')).draw(bar, {legend: 'none', colors: ['#3498db']});
 
-      // 3. Fill Table
-      const tbody = document.getElementById('tbody');
+      // Invoices Table (FIXED)
+      const tbody = document.getElementById('invBody');
       tbody.innerHTML = '';
-      data.invoices.forEach(i => {
-        tbody.innerHTML += `
-                    <tr>
-                        <td>#${i.id}</td><td>${i.customer}</td><td>${i.room}</td>
-                        <td><small>${i.checkIn}<br>${i.checkOut}</small></td>
-                        <td><button class="btn-inv" onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">📄 Invoice</button></td>
-                    </tr>`;
-      });
-    } catch(e) { console.error("Error loading dashboard", e); }
+      if (data.invoices && data.invoices.length > 0) {
+        data.invoices.forEach(i => {
+          tbody.innerHTML += `
+                        <tr>
+                            <td>#${i.id}</td><td>${i.customer}</td><td>${i.room}</td>
+                            <td><small>${i.checkIn}<br>${i.checkOut}</small></td>
+                            <td><button class="btn-inv" onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">📄 Invoice</button></td>
+                        </tr>`;
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5">No bookings yet.</td></tr>';
+      }
+    } catch(e) { console.error("Analytics Error:", e); }
   }
 
-  // --- FUNCTION TO ADD RECEPTIONIST ---
-  async function addReceptionist(e) {
-    e.preventDefault();
-
-    // 1. Prepare Data
-    const params = new URLSearchParams();
-    params.append('name', document.getElementById('regName').value);
-    params.append('email', document.getElementById('regEmail').value);
-    params.append('password', document.getElementById('regPass').value);
-
+  // --- 2. LOAD USERS ---
+  async function loadUsers() {
+    const tbody = document.getElementById('userBody');
     try {
-      // 2. Call the existing Register Servlet
-      const res = await fetch('register', { method: 'POST', body: params });
-      const json = await res.json();
+      const res = await fetch('userManagement');
+      if (!res.ok) throw new Error("API Error"); // Check for 500 error
 
-      // 3. Handle Result
-      if (json.status === 'success') {
-        alert("✅ Success! New Receptionist created.");
-        // Clear form
-        document.getElementById('regName').value = '';
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPass').value = '';
-      } else {
-        alert("❌ Error: " + json.message);
-      }
-    } catch (err) {
-      alert("❌ Server Error: Could not create user.");
+      const users = await res.json();
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        const badgeClass = u.role === 'ADMIN' ? 'role-ADMIN' : 'role-RECEPTIONIST';
+        tbody.innerHTML += `
+                    <tr>
+                        <td>#${u.id}</td>
+                        <td><strong>${u.name}</strong></td>
+                        <td>${u.email}</td>
+                        <td><span class="role-badge ${badgeClass}">${u.role}</span></td>
+                        <td><button class="btn-del" onclick="deleteUser(${u.id})">🗑 Delete</button></td>
+                    </tr>`;
+      });
+    } catch(e) {
+      console.log(e);
+      tbody.innerHTML = '<tr><td colspan="5" style="color:red">Error loading users. Check Backend Console.</td></tr>';
     }
   }
 
+  // Add User Logic
+  async function addUser(e) {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    params.append('name', document.getElementById('uName').value);
+    params.append('email', document.getElementById('uEmail').value);
+
+    try {
+      const res = await fetch('register', { method: 'POST', body: params });
+      const json = await res.json();
+      if(json.status === 'success') {
+        alert("✅ User Created!");
+        loadUsers(); // Refresh list
+      } else {
+        alert("Error: " + json.message);
+      }
+    } catch(e) { alert("Server Error"); }
+  }
+
+  // Delete User Logic
+  async function deleteUser(id) {
+    if(!confirm("Delete this user?")) return;
+    const params = new URLSearchParams();
+    params.append('action', 'delete');
+    params.append('id', id);
+
+    await fetch('userManagement', { method: 'POST', body: params });
+    loadUsers();
+  }
+
   function printInv(id, name, room, inDate, outDate, price) {
-    const url = `print_receipt.html?id=${id}&name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&in=${inDate}&out=${outDate}&price=${price}&total=${price}`; // logic simplified for demo
+    // Calculate approximate total for the button link
+    // (Real calculation happens on receipt page)
+    const total = price;
+    const url = `print_receipt.html?id=${id}&name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&in=${inDate}&out=${outDate}&price=${price}&total=${total}`;
     window.open(url, '_blank');
   }
 
   async function logout() {
     await fetch('logout');
     window.location.href = 'login_app.html';
-  }
-
-  async function addReceptionist(e) {
-    e.preventDefault();
-
-    const params = new URLSearchParams();
-    params.append('name', document.getElementById('regName').value);
-    params.append('email', document.getElementById('regEmail').value);
-    // No password param sent!
-
-    try {
-      const res = await fetch('register', { method: 'POST', body: params });
-      const json = await res.json();
-
-      if (json.status === 'success') {
-        alert("✅ Success! Account created.\n\nCheck 'FakeEmails' folder for the password.");
-        document.getElementById('regName').value = '';
-        document.getElementById('regEmail').value = '';
-      } else {
-        alert("❌ Error: " + json.message);
-      }
-    } catch (err) {
-      alert("❌ Server Error");
-    }
   }
 </script>
 

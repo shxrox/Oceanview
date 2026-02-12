@@ -5,6 +5,8 @@ import com.oceanview.repository.UserRepositoryImpl;
 import com.oceanview.model.User;
 import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Collections;
 
 public class UserService {
     private UserRepository userRepository;
@@ -43,4 +45,26 @@ public class UserService {
         // 3. Save changes to DB
         return userRepository.update(currentUser);
     }
+
+    // Check if this method exists in your file!
+    public List<User> getAllUsers() {
+        try {
+            return userRepository.findAll();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
+
+    // Check if this method exists too!
+    public boolean deleteUser(int id) {
+        try {
+            return userRepository.delete(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 }
