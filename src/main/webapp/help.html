@@ -2,147 +2,131 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Ocean View - User Guide</title>
+  <title>Help: Receipts & Bookings</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Font Awesome for icons -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
   <style>
-    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f6f7; color: #333; display: flex; height: 100vh; overflow: hidden; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f0f8ff;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-    /* SIDEBAR NAVIGATION */
-    .sidebar { width: 250px; background: #2c3e50; color: white; padding-top: 20px; display: flex; flex-direction: column; }
-    .sidebar h2 { text-align: center; font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid #34495e; padding-bottom: 10px; }
-    .sidebar a { color: #bdc3c7; text-decoration: none; padding: 15px 20px; display: block; border-left: 4px solid transparent; transition: 0.2s; }
-    .sidebar a:hover, .sidebar a.active { background: #34495e; color: white; border-left-color: #3498db; }
-    .sidebar .back-btn { margin-top: auto; background: #c0392b; text-align: center; font-weight: bold; }
-    .sidebar .back-btn:hover { background: #e74c3c; border-left-color: transparent; }
+    .wrapper { max-width: 900px; margin:0 auto; }
 
-    /* MAIN CONTENT AREA */
-    .content { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; }
-    .section { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 40px; }
+    a.back-btn {
+      display:inline-block;
+      margin-bottom:20px;
+      text-decoration:none;
+      color:#7f8c8d;
+      font-weight:bold;
+      font-size:14px;
+      transition:0.3s;
+    }
+    a.back-btn:hover { color:#00c6ff; }
 
-    h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-top: 0; }
-    h3 { color: #2980b9; margin-top: 25px; }
-    p { line-height: 1.6; color: #555; }
-    ul { padding-left: 20px; color: #555; }
-    li { margin-bottom: 10px; }
+    .card {
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      padding: 25px 30px;
+      border-radius:12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      margin-bottom: 25px;
+      color:#f0f8ff;
+    }
 
-    .badge { background: #f1c40f; color: #333; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
-    .img-placeholder { background: #ecf0f1; border: 2px dashed #bdc3c7; padding: 20px; text-align: center; color: #7f8c8d; margin: 15px 0; border-radius: 4px; }
+    h1 {
+      font-size:28px;
+      margin-bottom:20px;
+      color:#00c6ff;
+      border-bottom:2px solid #00c6ff;
+      padding-bottom:10px;
+    }
+    h2 {
+      font-size:20px;
+      color:#2980b9;
+      margin-top:25px;
+    }
+    p, li { font-size:15px; line-height:1.6; }
+    ul { padding-left:20px; margin-bottom:15px; }
+    li { margin-bottom:8px; }
+
+    .step-box {
+      background: rgba(255,255,255,0.1);
+      padding: 15px 20px;
+      border-left: 4px solid #00c6ff;
+      margin: 15px 0;
+      border-radius:6px;
+    }
+
+    .badge {
+      background:#f1c40f;
+      color:#333;
+      padding:2px 8px;
+      border-radius:4px;
+      font-weight:bold;
+      font-size:0.9em;
+    }
+
+    @media(max-width:600px){
+      .card { padding:20px; }
+      h1 { font-size:24px; }
+      h2 { font-size:18px; }
+    }
   </style>
 </head>
+
 <body>
+<div class="wrapper">
 
-<div class="sidebar">
-  <h2>📘 System Guide</h2>
-  <a href="#intro" class="active" onclick="setActive(this)">Getting Started</a>
-  <a href="#booking" onclick="setActive(this)">Making a Booking</a>
-  <a href="#receipts" onclick="setActive(this)">Receipts & Emails</a>
-  <a href="#profile" onclick="setActive(this)">My Profile</a>
-  <a href="#admin" onclick="setActive(this)">Admin Tools</a>
-  <a href="#trouble" onclick="setActive(this)">Troubleshooting</a>
-  <a href="javascript:history.back()" class="back-btn">&larr; Back to Dashboard</a>
+  <a href="receptionist_dashboard.html" class="back-btn">&larr; Back to Dashboard</a>
+
+  <div class="card">
+    <h1>Receipts & Bookings Guide</h1>
+    <p>This guide explains how to generate, print, and manage guest invoices and bookings efficiently.</p>
+
+    <h2>1. Generating a Receipt</h2>
+    <p>Receipts are automatically created when a booking is confirmed.</p>
+    <div class="step-box">
+      <strong>Step 1:</strong> Go to "New Booking".<br>
+      <strong>Step 2:</strong> Select check-in and check-out dates.<br>
+      <strong>Step 3:</strong> Choose a room and enter guest details.<br>
+      <strong>Step 4:</strong> Click "Confirm & Pay" to generate the receipt page.
+    </div>
+
+    <h2>2. Printing or Saving Invoices</h2>
+    <ul>
+      <li><strong>Print:</strong> Click "Print Invoice" and select your printer.</li>
+      <li><strong>Save as PDF:</strong> In the print dialog, select "Save as PDF" as the destination.</li>
+    </ul>
+
+    <h2>3. Reprinting Old Receipts</h2>
+    <p>To reprint, check the "Recent Reservations" table on the dashboard. Click the "Action" button or search by guest ID.</p>
+    <div class="step-box">
+      Ensure you have the correct guest and reservation date before reprinting.
+    </div>
+
+    <h2>4. Email Confirmations</h2>
+    <p>The system sends a simulated email receipt to the guest automatically.</p>
+    <p><span class="badge">NOTE</span> Emails are not sent over the internet in this demo environment.</p>
+    <ul>
+      <li>Find them in <code>Documents/OceanView/FakeEmails/</code>.</li>
+      <li>Open the corresponding text file to view the content.</li>
+    </ul>
+
+    <h2>5. Troubleshooting</h2>
+    <ul>
+      <li><strong>Invoice shows $0.00?</strong> Check that the check-out date is after the check-in date.</li>
+      <li><strong>Printer issues?</strong> Verify your computer's printer settings; the print button triggers the browser print dialog.</li>
+    </ul>
+
+  </div>
 </div>
-
-<div class="content">
-
-  <div id="intro" class="section">
-    <h1>Getting Started</h1>
-    <p>Welcome to the <strong>Ocean View Resort Management System</strong>. This software helps manage room bookings, guest invoices, and staff accounts efficiently.</p>
-    <h3>Logging In</h3>
-    <p>Access the system using your email and password.</p>
-    <ul>
-      <li><strong>Admin:</strong> Has full access to revenue reports and user management.</li>
-      <li><strong>Receptionist:</strong> Can search rooms, make bookings, and print invoices.</li>
-    </ul>
-  </div>
-
-  <div id="booking" class="section">
-    <h1>Making a Booking</h1>
-    <p>Follow these steps to reserve a room for a guest:</p>
-
-    <h3>Step 1: Check Availability</h3>
-    <p>From the dashboard, click <strong>"🔍 New Booking"</strong>.</p>
-    <ul>
-      <li>Select a <strong>Check-In Date</strong>.</li>
-      <li>Select a <strong>Check-Out Date</strong> (must be after check-in).</li>
-      <li>Click "Search Rooms".</li>
-    </ul>
-    <p><em>Note: The system automatically hides dates that are in the past.</em></p>
-
-    <h3>Step 2: Select a Room</h3>
-    <p>You will see a list of available rooms (Deluxe, Standard, Suite). Click the green <strong>"Book Now"</strong> button next to the desired room.</p>
-
-    <h3>Step 3: Guest Details</h3>
-    <p>Enter the guest's <strong>Name</strong>, <strong>Email</strong>, and <strong>Phone Number</strong>. The system will automatically calculate the <strong>Total Price</strong> based on the number of nights.</p>
-  </div>
-
-  <div id="receipts" class="section">
-    <h1>Receipts & Emails</h1>
-
-    <h3>📄 Printed Invoices</h3>
-    <p>After confirming a booking, an invoice is automatically generated.</p>
-    <ul>
-      <li>Click <strong>"Print Invoice"</strong> to send it to the printer or save as PDF.</li>
-      <li>You can reprint invoices later from the Dashboard table.</li>
-    </ul>
-
-    <h3>📧 Email Confirmations</h3>
-    <p>The system sends a digital receipt to the guest automatically.</p>
-    <p><span class="badge">NOTE</span> Since this is a demo environment, emails are not sent over the internet. Instead, they are saved as text files in the <strong>FakeEmails</strong> folder on the server computer.</p>
-  </div>
-
-  <div id="profile" class="section">
-    <h1>Managing Your Profile</h1>
-    <p>If you are a new staff member, you likely have a temporary password (e.g., <code>a1b2c3d4</code>).</p>
-    <h3>Changing Password</h3>
-    <ol>
-      <li>Click the purple <strong>"👤 My Profile"</strong> card on your dashboard.</li>
-      <li>Enter your correct Full Name.</li>
-      <li>Type a new, secure password.</li>
-      <li>Click <strong>"Update Profile"</strong>.</li>
-    </ol>
-    <p>Next time you login, use your new password.</p>
-  </div>
-
-  <div id="admin" class="section">
-    <h1>Admin Tools <span class="badge">ADMIN ONLY</span></h1>
-    <p>Administrators have access to specialized tools for managing the business.</p>
-
-    <h3>📊 Analytics Tab</h3>
-    <p>View real-time charts showing:</p>
-    <ul>
-      <li><strong>Revenue Overview:</strong> Which room types make the most money.</li>
-      <li><strong>Room Popularity:</strong> Pie chart of most booked rooms.</li>
-    </ul>
-
-    <h3>👥 User Management Tab</h3>
-    <p>Manage the staff who have access to the system.</p>
-    <ul>
-      <li><strong>Add User:</strong> Create accounts for new receptionists. The system will auto-generate a password and "email" it to the FakeEmails folder.</li>
-      <li><strong>Delete User:</strong> Remove staff who no longer work there.</li>
-    </ul>
-  </div>
-
-  <div id="trouble" class="section">
-    <h1>Troubleshooting</h1>
-
-    <h3>"Invalid Email or Password"</h3>
-    <p>Double-check your spelling. If you forgot your password, ask an Admin to delete your account and create a new one.</p>
-
-    <h3>"Error Loading Data"</h3>
-    <p>If charts or tables don't load, the server might be down. Contact IT Support to restart the Tomcat Server.</p>
-
-    <h3>Check-Out Date Issue</h3>
-    <p>Ensure the Check-Out date is strictly <strong>after</strong> the Check-In date. You cannot book a room for 0 nights.</p>
-  </div>
-
-</div>
-
-<script>
-  // Simple script to highlight active sidebar link
-  function setActive(element) {
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    element.classList.add('active');
-  }
-</script>
-
 </body>
 </html>
