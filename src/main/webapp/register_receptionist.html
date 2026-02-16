@@ -3,24 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <title>Sign Up</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { background: #f4f6f7; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
-    .card { background: white; padding: 30px; width: 350px; border-radius: 8px; text-align: center; }
-    input { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; cursor: pointer; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+    }
+
+    .card {
+      width: 380px;
+      padding: 40px;
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    input:focus {
+      box-shadow: 0 0 5px rgba(255,255,255,0.4);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      background: #27ae60;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1e8449;
+      transform: translateY(-2px);
+    }
+
+    p {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    a {
+      color: #1abc9c;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media(max-width: 480px) {
+      .card {
+        width: 90%;
+        padding: 30px;
+      }
+    }
   </style>
 </head>
+
 <body>
+
 <div class="card">
   <h2>Create Account</h2>
+
   <form onsubmit="handleReg(event)">
     <input type="text" id="name" placeholder="Full Name" required>
     <input type="email" id="email" placeholder="Email" required>
     <input type="password" id="pass" placeholder="Password" required>
     <button type="submit">Register</button>
   </form>
+
   <p><a href="login_app.html">Back to Login</a></p>
 </div>
+
 <script>
   async function handleReg(e) {
     e.preventDefault();
@@ -32,9 +113,14 @@
     const res = await fetch('register', { method: 'POST', body: data });
     const json = await res.json();
 
-    if(json.status === 'success') { alert("Success! Please Login."); window.location.href='login_app.html'; }
-    else alert("Error: " + json.message);
+    if(json.status === 'success') {
+      alert("Success! Please Login.");
+      window.location.href='login_app.html';
+    } else {
+      alert("Error: " + json.message);
+    }
   }
 </script>
+
 </body>
 </html>
