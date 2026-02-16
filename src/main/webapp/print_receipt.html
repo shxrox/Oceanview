@@ -3,17 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <title>Invoice</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
-        body { font-family: 'Courier New', monospace; padding: 40px; }
-        .invoice-box { border: 2px solid #333; padding: 30px; max-width: 600px; margin: 0 auto; }
-        .header { text-align: center; border-bottom: 1px dashed #333; margin-bottom: 20px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .total { font-weight: bold; font-size: 1.2em; border-top: 1px solid #333; padding-top: 10px; margin-top: 20px; }
-        .print-btn { display: block; width: 100%; padding: 10px; background: #333; color: white; border: none; cursor: pointer; margin-top: 30px; }
-        @media print { .print-btn { display: none; } }
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            padding: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .invoice-box {
+            background: #ffffff;
+            color: #2c3e50;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 20px;
+        }
+
+        .header h2 {
+            color: #00c6ff;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 15px;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .total {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 2px solid #2c3e50;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .print-btn {
+            margin-top: 30px;
+            width: 100%;
+            padding: 12px;
+            background: #00c6ff;
+            color: #0f2027;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .print-btn:hover {
+            background: #00a6d6;
+            transform: translateY(-2px);
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .invoice-box {
+                box-shadow: none;
+                border-radius: 0;
+                margin: 0;
+            }
+
+            .print-btn {
+                display: none;
+            }
+        }
+
+        /* MOBILE */
+        @media(max-width:600px){
+            .invoice-box {
+                padding: 25px;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .total {
+                font-size: 16px;
+            }
+        }
+
     </style>
 </head>
 <body>
+
 <div class="invoice-box">
     <div class="header">
         <h2>OCEAN VIEW RESORT</h2>
@@ -21,21 +140,21 @@
         <p>Invoice #<span id="invId"></span></p>
     </div>
 
-    <div class="row"><span>Guest:</span> <span id="invName"></span></div>
-    <div class="row"><span>Room:</span> <span id="invRoom"></span></div>
-    <div class="row"><span>Check-In:</span> <span id="invIn"></span></div>
-    <div class="row"><span>Check-Out:</span> <span id="invOut"></span></div>
-    <div class="row"><span>Rate:</span> <span>$<span id="invPrice"></span> / night</span></div>
+    <div class="row"><span class="label">Guest:</span> <span id="invName"></span></div>
+    <div class="row"><span class="label">Room:</span> <span id="invRoom"></span></div>
+    <div class="row"><span class="label">Check-In:</span> <span id="invIn"></span></div>
+    <div class="row"><span class="label">Check-Out:</span> <span id="invOut"></span></div>
+    <div class="row"><span class="label">Rate:</span> <span>$<span id="invPrice"></span> / night</span></div>
 
     <div class="row total">
-        <span>TOTAL PAID:</span> <span>$<span id="invTotal"></span></span>
+        <span>TOTAL PAID:</span>
+        <span>$<span id="invTotal"></span></span>
     </div>
 
     <button onclick="window.print()" class="print-btn">Print Invoice</button>
 </div>
 
 <script>
-    // Read URL Parameters (e.g., print_receipt.html?id=5&name=Sam...)
     const params = new URLSearchParams(window.location.search);
 
     document.getElementById('invId').innerText = params.get('id');
@@ -46,8 +165,8 @@
     document.getElementById('invPrice').innerText = params.get('price');
     document.getElementById('invTotal').innerText = params.get('total');
 
-    // Update Title dynamically
     document.title = "Invoice #" + params.get('id');
 </script>
+
 </body>
 </html>
