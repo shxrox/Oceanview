@@ -47,6 +47,7 @@ public class ReservationService {
 
                 // C. Send Email with the Total Amount
                 emailService.sendBookingConfirmation(res, totalAmount, room.getRoomNumber());
+                emailService.sendSMS(phone, "Booking Confirmed! Room " + room.getRoomNumber() + ". Total: $" + totalAmount);
 
                 return true;
             }

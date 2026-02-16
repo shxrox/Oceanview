@@ -86,17 +86,34 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         return map;
     }
 
-    // 5. ADMIN DASHBOARD: Bar Chart Data (Revenue)
     @Override
     public Map<String, Double> getRevenueByRoomType() throws SQLException {
         Map<String, Double> map = new HashMap<>();
-        String sql = "SELECT r.room_type, SUM(r.price_per_night * DATEDIFF(res.check_out, res.check_in)) as rev " +
-                "FROM reservations res JOIN rooms r ON res.room_id = r.id " +
-                "GROUP BY r.room_type";
+
+        // We define the room types we want to calculate
+        String[] types = {"Single", "Double", "Suite"};
+
+        // JDBC Syntax to call a Stored Procedure: {CALL ProcedureName(Param1, Param2)}
+        String sql = "{CALL GetRoomRevenue(?, ?)}";
+
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while(rs.next()) map.put(rs.getString("room_type"), rs.getDouble("rev"));
+             CallableStatement stmt = conn.prepareCall(sql)) {
+
+            for (String type : types) {
+                // 1. Pass the Input Parameter (IN p_roomType)
+                stmt.setString(1, type);
+
+                // 2. Register the Output Parameter (OUT p_totalRevenue)
+                // This tells Java: "Expect a Decimal number back from the database here"
+                stmt.registerOutParameter(2, java.sql.Types.DECIMAL);
+
+                // 3. Run the Procedure
+                stmt.execute();
+
+                // 4. Retrieve the calculated value
+                double revenue = stmt.getDouble(2);
+                map.put(type, revenue);
+            }
         }
         return map;
     }

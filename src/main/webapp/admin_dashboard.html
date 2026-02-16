@@ -8,30 +8,26 @@
     body { font-family: sans-serif; background: #f4f6f7; padding: 20px; }
     .wrapper { max-width: 1200px; margin: 0 auto; }
 
-    /* Header & Nav */
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
     .tab-btn { background: none; border: none; font-size: 16px; padding: 10px 20px; cursor: pointer; color: #7f8c8d; font-weight: bold; }
     .tab-btn.active { color: #3498db; border-bottom: 3px solid #3498db; }
     .logout { background: #e74c3c; color: white; text-decoration: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 14px; }
 
-    /* Sections */
     .section { display: none; }
     .section.active { display: block; }
 
-    /* Grid & Cards */
     .dashboard-grid { display: flex; gap: 20px; }
     .col-left { flex: 3; }
     .col-right { flex: 1; }
+
     .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
     .chart-box { height: 250px; }
 
-    /* Tables */
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th { background: #2c3e50; color: white; padding: 10px; text-align: left; }
     td { padding: 10px; border-bottom: 1px solid #eee; }
 
-    /* Buttons & Badges */
     .btn-inv { background: #8e44ad; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
     .btn-del { background: #c0392b; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
     .btn-add { background: #2980b9; color: white; padding: 10px; width: 100%; border: none; cursor: pointer; border-radius: 4px; margin-top: 10px;}
@@ -40,7 +36,7 @@
     .role-ADMIN { background: #8e44ad; color: white; }
     .role-RECEPTIONIST { background: #27ae60; color: white; }
 
-    input { width: 100%; padding: 10px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    input, select { width: 100%; padding: 10px; margin-bottom: 5px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
   </style>
 </head>
 <body>
@@ -56,34 +52,71 @@
     <button class="tab-btn" onclick="switchTab('users')">👥 User Management</button>
   </div>
 
+  <!-- --- ANALYTICS SECTION --- -->
   <div id="analytics" class="section active">
     <div class="dashboard-grid">
+      <!-- Left Column -->
       <div class="col-left">
+        <!-- Revenue Overview -->
         <div class="card">
           <h3>Revenue Overview</h3>
           <div id="barchart" class="chart-box">Loading Chart...</div>
         </div>
 
+        <!-- Recent Bookings / Invoices -->
         <div class="card">
           <h3>Recent Bookings & Invoices</h3>
           <table>
-            <thead><tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr></thead>
+            <thead>
+            <tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr>
+            </thead>
             <tbody id="invBody"><tr><td colspan="5">Loading data...</td></tr></tbody>
           </table>
         </div>
       </div>
 
+      <!-- Right Column -->
       <div class="col-right">
+        <!-- Room Popularity Pie -->
         <div class="card">
           <h3>Room Popularity</h3>
           <div id="piechart" style="height: 200px;">Loading...</div>
+        </div>
+
+        <!-- Add Expense -->
+        <div class="card" style="border-top: 4px solid #e74c3c;">
+          <h3>💸 Add Expense</h3>
+          <form onsubmit="addExpense(event)">
+            <label>Category</label>
+            <select id="exCat">
+              <option>Utilities</option>
+              <option>Salaries</option>
+              <option>Maintenance</option>
+              <option>Marketing</option>
+              <option>Other</option>
+            </select>
+
+            <label>Amount ($)</label>
+            <input type="number" id="exAmount" step="0.01" required>
+
+            <button type="submit" class="btn-del" style="width:100%">Record Expense</button>
+          </form>
+        </div>
+
+        <!-- Net Profit -->
+        <div class="card" style="background: #2c3e50; color: white;">
+          <h3>💰 Net Profit</h3>
+          <h1 id="profitDisplay">Loading...</h1>
+          <small id="expenseDisplay">Expenses: $0.00</small>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- --- USER MANAGEMENT SECTION --- -->
   <div id="users" class="section">
     <div class="dashboard-grid">
+      <!-- Right Column -->
       <div class="col-right">
         <div class="card" style="border-top: 4px solid #2980b9;">
           <h3>➕ Add User</h3>
@@ -95,6 +128,7 @@
         </div>
       </div>
 
+      <!-- Left Column -->
       <div class="col-left">
         <div class="card">
           <h3>System Users</h3>
@@ -111,79 +145,107 @@
 <script>
   google.charts.load('current', {'packages':['corechart']});
   google.charts.setOnLoadCallback(loadAnalytics);
-
-  // Load Users immediately too
   loadUsers();
 
   function switchTab(tabId) {
     document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
+    event.currentTarget.classList.add('active');
   }
 
-  // --- 1. LOAD ANALYTICS & INVOICES ---
+  // --- LOAD ANALYTICS ---
   async function loadAnalytics() {
     try {
       const res = await fetch('adminData');
       const data = await res.json();
 
-      // Charts
+      // Pie Chart
       var pie = new google.visualization.DataTable();
       pie.addColumn('string', 'Type'); pie.addColumn('number', 'Count');
       data.pieData.forEach(d => pie.addRow([d.type, d.count]));
-      new google.visualization.PieChart(document.getElementById('piechart')).draw(pie, {legend: 'bottom', pieHole: 0.4});
+      new google.visualization.PieChart(document.getElementById('piechart'))
+              .draw(pie, {legend: 'bottom', pieHole: 0.4});
 
+      // Bar Chart
       var bar = new google.visualization.DataTable();
       bar.addColumn('string', 'Type'); bar.addColumn('number', 'Revenue');
-      data.barData.forEach(d => bar.addRow([d.type, d.revenue]));
-      new google.visualization.ColumnChart(document.getElementById('barchart')).draw(bar, {legend: 'none', colors: ['#3498db']});
+      let totalRevenue = 0;
+      data.barData.forEach(d => { bar.addRow([d.type, d.revenue]); totalRevenue += d.revenue; });
+      new google.visualization.ColumnChart(document.getElementById('barchart'))
+              .draw(bar, {legend: 'none', colors: ['#3498db']});
 
-      // Invoices Table (FIXED)
+      // Profit Calculation
+      const totalExpenses = data.totalExpenses || 0;
+      const profit = totalRevenue - totalExpenses;
+      document.getElementById('profitDisplay').innerText = "$" + profit.toFixed(2);
+      document.getElementById('expenseDisplay').innerText = "Total Expenses: $" + totalExpenses.toFixed(2);
+      document.getElementById('profitDisplay').style.color = profit >= 0 ? '#2ecc71' : '#e74c3c';
+
+      // Invoices Table
       const tbody = document.getElementById('invBody');
       tbody.innerHTML = '';
       if (data.invoices && data.invoices.length > 0) {
         data.invoices.forEach(i => {
           tbody.innerHTML += `
-                        <tr>
-                            <td>#${i.id}</td><td>${i.customer}</td><td>${i.room}</td>
-                            <td><small>${i.checkIn}<br>${i.checkOut}</small></td>
-                            <td><button class="btn-inv" onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">📄 Invoice</button></td>
-                        </tr>`;
+            <tr>
+              <td>#${i.id}</td>
+              <td>${i.customer}</td>
+              <td>${i.room}</td>
+              <td><small>${i.checkIn}<br>${i.checkOut}</small></td>
+              <td>
+                <button class="btn-inv"
+                  onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">
+                  📄 Invoice
+                </button>
+              </td>
+            </tr>`;
         });
-      } else {
-        tbody.innerHTML = '<tr><td colspan="5">No bookings yet.</td></tr>';
-      }
+      } else { tbody.innerHTML = '<tr><td colspan="5">No bookings yet.</td></tr>'; }
+
     } catch(e) { console.error("Analytics Error:", e); }
   }
 
-  // --- 2. LOAD USERS ---
+  // --- ADD EXPENSE ---
+  async function addExpense(e) {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    params.append('category', document.getElementById('exCat').value);
+    params.append('amount', document.getElementById('exAmount').value);
+
+    try {
+      const res = await fetch('addExpense', { method: 'POST', body: params });
+      const json = await res.json();
+      if(json.status === 'success') {
+        alert("✅ Expense Saved!");
+        document.getElementById('exAmount').value = "";
+        loadAnalytics();
+      } else { alert("Error saving expense"); }
+    } catch(e) { alert("Server Error"); }
+  }
+
+  // --- USERS MANAGEMENT ---
   async function loadUsers() {
     const tbody = document.getElementById('userBody');
     try {
       const res = await fetch('userManagement');
-      if (!res.ok) throw new Error("API Error"); // Check for 500 error
-
+      if(!res.ok) throw new Error("API Error");
       const users = await res.json();
       tbody.innerHTML = '';
       users.forEach(u => {
         const badgeClass = u.role === 'ADMIN' ? 'role-ADMIN' : 'role-RECEPTIONIST';
         tbody.innerHTML += `
-                    <tr>
-                        <td>#${u.id}</td>
-                        <td><strong>${u.name}</strong></td>
-                        <td>${u.email}</td>
-                        <td><span class="role-badge ${badgeClass}">${u.role}</span></td>
-                        <td><button class="btn-del" onclick="deleteUser(${u.id})">🗑 Delete</button></td>
-                    </tr>`;
+          <tr>
+            <td>#${u.id}</td>
+            <td><strong>${u.name}</strong></td>
+            <td>${u.email}</td>
+            <td><span class="role-badge ${badgeClass}">${u.role}</span></td>
+            <td><button class="btn-del" onclick="deleteUser(${u.id})">🗑 Delete</button></td>
+          </tr>`;
       });
-    } catch(e) {
-      console.log(e);
-      tbody.innerHTML = '<tr><td colspan="5" style="color:red">Error loading users. Check Backend Console.</td></tr>';
-    }
+    } catch(e) { tbody.innerHTML = '<tr><td colspan="5" style="color:red">Error loading users</td></tr>'; }
   }
 
-  // Add User Logic
   async function addUser(e) {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -193,39 +255,30 @@
     try {
       const res = await fetch('register', { method: 'POST', body: params });
       const json = await res.json();
-      if(json.status === 'success') {
-        alert("✅ User Created!");
-        loadUsers(); // Refresh list
-      } else {
-        alert("Error: " + json.message);
-      }
+      if(json.status === 'success') { alert("✅ User Created!"); loadUsers(); }
+      else alert("Error: " + json.message);
     } catch(e) { alert("Server Error"); }
   }
 
-  // Delete User Logic
   async function deleteUser(id) {
     if(!confirm("Delete this user?")) return;
     const params = new URLSearchParams();
-    params.append('action', 'delete');
-    params.append('id', id);
-
-    await fetch('userManagement', { method: 'POST', body: params });
+    params.append('action','delete'); params.append('id',id);
+    await fetch('userManagement',{ method:'POST', body:params });
     loadUsers();
   }
 
-  function printInv(id, name, room, inDate, outDate, price) {
-    // Calculate approximate total for the button link
-    // (Real calculation happens on receipt page)
+  function printInv(id,name,room,inDate,outDate,price){
     const total = price;
     const url = `print_receipt.html?id=${id}&name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&in=${inDate}&out=${outDate}&price=${price}&total=${total}`;
-    window.open(url, '_blank');
+    window.open(url,'_blank');
   }
 
   async function logout() {
     await fetch('logout');
     window.location.href = 'login_app.html';
   }
-</script>
 
+</script>
 </body>
 </html>

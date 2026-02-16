@@ -52,4 +52,22 @@ public class EmailService {
             e.printStackTrace();
         }
     }
+
+
+    public void sendSMS(String phoneNumber, String message) {
+        String fileName = "SMS_" + phoneNumber + "_" + System.currentTimeMillis() + ".txt";
+        String content = "To: " + phoneNumber + "\nMessage: " + message;
+
+        // Save to a "FakeSMS" folder
+        String smsPath = "C:\\Users\\sharo\\OneDrive\\...\\FakeSMS\\"; // Update this path!
+        File folder = new File(smsPath);
+        if (!folder.exists()) folder.mkdirs();
+
+        try (FileWriter writer = new FileWriter(new File(folder, fileName))) {
+            writer.write(content);
+            System.out.println("📱 Fake SMS Sent: " + fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
