@@ -3,19 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <title>Confirm Booking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { background: #f4f6f7; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
-    .card { background: white; padding: 30px; border-radius: 8px; width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .summary { background: #ecf0f1; padding: 15px; margin-bottom: 20px; border-radius: 5px; font-size: 14px; }
-    .total-row { font-size: 1.2em; font-weight: bold; color: #2c3e50; border-top: 1px solid #bdc3c7; margin-top: 10px; padding-top: 10px; }
-    input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-    button:hover { background: #219150; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { height:100%; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #f0f8ff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Subtle animated background gradient */
+    body::before {
+      content: '';
+      position: absolute;
+      top:0; left:0; right:0; bottom:0;
+      background: linear-gradient(270deg, #0f2027, #203a43, #2c5364, #0f2027);
+      background-size: 800% 800%;
+      animation: gradientShift 20s ease infinite;
+      z-index:0;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      position: relative;
+      z-index:1;
+      width: 100%;
+      max-width: 450px;
+      padding: 30px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      font-size: 32px;
+      margin-bottom: 25px;
+      color: #00c6ff;
+      text-shadow: 0 2px 8px rgba(0,150,255,0.4);
+    }
+
+    .summary {
+      margin-bottom: 25px;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #dff6ff;
+      text-align: left;
+    }
+
+    .summary p { margin-bottom: 8px; }
+    .total-row {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.3);
+      padding-top: 10px;
+      color: #00c6ff;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: #f0f8ff;
+      font-size: 15px;
+      transition: all 0.3s;
+    }
+    input:focus {
+      outline:none;
+      border-color: #00c6ff;
+      box-shadow: 0 0 10px rgba(0,198,255,0.5);
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(0,198,255,0.3);
+      margin-bottom: 10px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,198,255,0.5);
+    }
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 6px 20px rgba(0,198,255,0.2);
+    }
+
+    .back-btn {
+      display: block;
+      text-decoration: none;
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+      padding: 12px;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-size: 15px;
+    }
+    .back-btn:hover { background: rgba(0,198,255,0.3); }
+
+    /* Mobile */
+    @media(max-width:480px){
+      .container { padding:25px; }
+      h2 { font-size:26px; }
+      input { padding:12px; font-size:14px; }
+      button { padding:14px; font-size:15px; }
+    }
   </style>
 </head>
+
 <body>
 
-<div class="card">
+<div class="container">
   <h2>Confirm Booking</h2>
 
   <div class="summary">
@@ -24,10 +151,7 @@
     <p><strong>Check-Out:</strong> <span id="sOut"></span></p>
     <p><strong>Duration:</strong> <span id="sDays"></span> nights</p>
     <p><strong>Price per Night:</strong> $<span id="sPrice"></span></p>
-
-    <div class="total-row">
-      TOTAL: $<span id="sTotal"></span>
-    </div>
+    <div class="total-row">TOTAL: $<span id="sTotal"></span></div>
   </div>
 
   <form onsubmit="confirmBooking(event)">
@@ -37,25 +161,18 @@
     <button type="submit" id="btn">Confirm & Pay</button>
   </form>
 
-  <div style="text-align: center; margin-top: 10px;">
-    <a href="search_app.html" style="color: #7f8c8d; text-decoration: none;">Cancel</a>
-  </div>
+  <a href="receptionist_dashboard.html" class="back-btn">← Back to Dashboard</a>
 </div>
 
 <script>
-  // 1. GET PARAMS FROM URL
   const params = new URLSearchParams(window.location.search);
   const pricePerNight = parseFloat(params.get('price'));
   const checkInDate = new Date(params.get('in'));
   const checkOutDate = new Date(params.get('out'));
-
-  // 2. CALCULATE DAYS
-  // (Difference in Time / (1000 * 3600 * 24))
   const diffTime = Math.abs(checkOutDate - checkInDate);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   const totalAmount = diffDays * pricePerNight;
 
-  // 3. DISPLAY DATA
   document.getElementById('sRoom').innerText = params.get('room');
   document.getElementById('sIn').innerText = params.get('in');
   document.getElementById('sOut').innerText = params.get('out');
@@ -63,7 +180,7 @@
   document.getElementById('sPrice').innerText = pricePerNight.toFixed(2);
   document.getElementById('sTotal').innerText = totalAmount.toFixed(2);
 
-  async function confirmBooking(e) {
+  async function confirmBooking(e){
     e.preventDefault();
     const btn = document.getElementById('btn');
     btn.innerText = "Processing...";
@@ -76,14 +193,13 @@
     data.append('name', document.getElementById('name').value);
     data.append('email', document.getElementById('email').value);
     data.append('phone', document.getElementById('phone').value);
-    data.append('totalPrice', totalAmount); // Send Total to Server (Optional, server should recalc)
+    data.append('totalPrice', totalAmount);
 
     try {
-      const res = await fetch('bookRoom', { method: 'POST', body: data });
+      const res = await fetch('bookRoom', { method:'POST', body:data });
       const json = await res.json();
 
-      if(json.status === 'success') {
-        // Redirect to Receipt Printer
+      if(json.status === 'success'){
         const name = document.getElementById('name').value;
         const url = `print_receipt.html?id=${params.get('id')}&name=${encodeURIComponent(name)}&room=${params.get('room')}&in=${params.get('in')}&out=${params.get('out')}&price=${pricePerNight}&total=${totalAmount}`;
         window.location.href = url;
@@ -91,8 +207,9 @@
         alert("Error: " + json.message);
         btn.disabled = false;
       }
-    } catch (err) {
+    } catch(err){
       alert("Server Error");
+      btn.disabled = false;
     }
   }
 </script>
