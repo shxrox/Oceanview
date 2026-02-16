@@ -3,122 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <title>Admin Dashboard</title>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google Charts -->
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
-  <!-- Font Awesome for icons -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-      color: #f0f8ff;
+      padding: 40px;
+      color: white;
       min-height: 100vh;
-      padding: 20px;
     }
 
-    .wrapper { max-width: 1200px; margin:0 auto; }
+    .wrapper { max-width: 1300px; margin: 0 auto; }
 
+    /* Header */
     .header {
-      display:flex; justify-content:space-between; align-items:center;
-      margin-bottom:25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 15px;
     }
 
-    .header h2 { font-weight:700; font-size:28px; color:#ffffff; }
+    .header h2 { font-weight: 500; letter-spacing: 1px; }
+
     .logout {
-      background:#e74c3c; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;
-      transition: all 0.3s ease;
+      background: #e74c3c;
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: white;
+      font-weight: 600;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
     }
-    .logout:hover { background:#c0392b; }
 
+    .logout:hover { background: #c0392b; transform: translateY(-2px); }
+
+    /* Tabs */
     .nav-tabs {
-      display:flex; gap:10px; margin-bottom:25px; border-bottom:2px solid rgba(255,255,255,0.2); padding-bottom:10px;
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
     }
+
     .tab-btn {
-      background:none; border:none; font-size:16px; padding:10px 20px; cursor:pointer; font-weight:bold;
-      color: rgba(255,255,255,0.6); border-bottom:3px solid transparent; transition: all 0.3s;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      padding: 10px 25px;
+      border-radius: 30px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.7);
+      font-weight: 600;
+      transition: 0.3s;
     }
-    .tab-btn.active { color:#00c6ff; border-bottom:3px solid #00c6ff; }
 
-    .section { display:none; }
-    .section.active { display:block; }
+    .tab-btn:hover { background: rgba(255,255,255,0.15); color: white; }
 
-    .dashboard-grid { display:flex; flex-wrap:wrap; gap:20px; }
-    .col-left { flex:3; min-width:300px; }
-    .col-right { flex:1; min-width:250px; }
+    .tab-btn.active {
+      background: #3498db;
+      color: white;
+      border-color: #3498db;
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    }
+
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.5s ease; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Grid & Cards */
+    .dashboard-grid { display: flex; gap: 25px; flex-wrap: wrap; }
+    .col-left { flex: 3; min-width: 300px; }
+    .col-right { flex: 1; min-width: 250px; }
 
     .card {
-      background: rgba(255,255,255,0.05);
-      backdrop-filter: blur(10px);
-      padding:20px;
-      border-radius:12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      margin-bottom:20px;
-      color:#f0f8ff;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 25px;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      transition: 0.3s;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     }
 
-    h3 { margin-bottom:15px; font-size:18px; font-weight:600; display:flex; align-items:center; gap:8px; }
+    .card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); }
 
-    .chart-box { height:250px; }
-
-    table {
-      width:100%; border-collapse:collapse; margin-top:10px; background: rgba(255,255,255,0.1); border-radius:8px; overflow:hidden;
+    .card h3 {
+      margin-bottom: 15px;
+      font-weight: 400;
+      color: #bdc3c7;
+      font-size: 1.1em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    th, td { padding:10px; text-align:left; }
-    th { background:#1b2838; color:#ffffff; }
-    td { border-bottom:1px solid rgba(255,255,255,0.2); }
 
+    .chart-box { height: 250px; }
+
+    /* Tables */
+    table { width:100%; border-collapse: collapse; margin-top:5px; }
+    th { padding:12px; text-align:left; background: rgba(255,255,255,0.1); color:white; border-radius:6px; }
+    td { padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.8); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.05); }
+
+    /* Buttons */
     .btn-inv, .btn-del, .btn-add {
-      padding:6px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition: all 0.3s;
-      color:#fff;
+      border:none; padding:6px 12px; border-radius:6px; cursor:pointer;
+      font-weight:600; transition:0.3s; color:white; font-size:12px;
     }
-    .btn-inv { background:#2980b9; }
-    .btn-inv:hover { background:#1c5980; }
-    .btn-del { background:#e74c3c; }
-    .btn-del:hover { background:#c0392b; }
-    .btn-add { background:#27ae60; width:100%; margin-top:10px; }
-    .btn-add:hover { background:#1f8a4d; }
+    .btn-inv { background: linear-gradient(135deg, #3498db, #2980b9); }
+    .btn-inv:hover { box-shadow: 0 0 10px rgba(52, 152, 219, 0.5); }
+    .btn-del { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+    .btn-del:hover { box-shadow: 0 0 10px rgba(231, 76, 60, 0.5); }
+    .btn-add { background: linear-gradient(135deg, #27ae60, #2ecc71); width:100%; padding:12px; font-size:14px; margin-top:10px; }
+    .btn-add:hover { box-shadow: 0 0 15px rgba(46, 204, 113, 0.4); }
 
-    .role-badge { padding:4px 10px; border-radius:12px; font-size:12px; font-weight:600; }
-    .role-ADMIN { background:#8e44ad; color:#fff; }
-    .role-RECEPTIONIST { background:#27ae60; color:#fff; }
+    /* Badges */
+    .role-badge { padding: 4px 10px; border-radius: 20px; font-size:11px; font-weight:bold; letter-spacing:0.5px; }
+    .role-ADMIN { background: rgba(52,152,219,0.2); color:#3498db; border:1px solid #3498db; }
+    .role-RECEPTIONIST { background: rgba(46,204,113,0.2); color:#2ecc71; border:1px solid #2ecc71; }
 
-    input, select { width:100%; padding:10px; margin-bottom:5px; border:1px solid rgba(255,255,255,0.2); border-radius:6px; background:rgba(255,255,255,0.05); color:#f0f8ff; }
+    /* Inputs */
+    input, select {
+      width:100%; padding:12px; margin-bottom:15px;
+      border-radius:8px; border:1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.2); color:white; outline:none; font-size:14px;
+    }
+    input:focus, select:focus { border-color: #3498db; background: rgba(0,0,0,0.4); }
+    option { background: #2c3e50; color:white; }
+    label { font-size:12px; color: rgba(255,255,255,0.6); margin-bottom:5px; display:block; }
 
-    @media(max-width:768px){
-      .dashboard-grid { flex-direction:column; }
+    @media(max-width:900px){
+      body { padding:20px; }
+      .dashboard-grid { flex-direction: column; }
+      .col-left, .col-right { width: 100%; }
     }
   </style>
 </head>
-
 <body>
 
 <div class="wrapper">
   <div class="header">
-    <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
-    <a href="#" onclick="logout()" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    <h2>Admin Control Center</h2>
+    <a href="#" onclick="logout()" class="logout">Logout</a>
   </div>
 
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('analytics')"><i class="fas fa-chart-bar"></i> Analytics & Invoices</button>
-    <button class="tab-btn" onclick="switchTab('users')"><i class="fas fa-users"></i> User Management</button>
+    <button class="tab-btn active" onclick="switchTab('analytics')">Analytics & Invoices</button>
+    <button class="tab-btn" onclick="switchTab('users')">User Management</button>
   </div>
 
-  <!-- ANALYTICS SECTION -->
   <div id="analytics" class="section active">
     <div class="dashboard-grid">
       <div class="col-left">
         <div class="card">
-          <h3><i class="fas fa-chart-line"></i> Revenue Overview</h3>
+          <h3>Revenue Overview</h3>
           <div id="barchart" class="chart-box">Loading Chart...</div>
         </div>
-
         <div class="card">
-          <h3><i class="fas fa-receipt"></i> Recent Bookings & Invoices</h3>
+          <h3>Recent Bookings & Invoices</h3>
           <table>
             <thead>
             <tr><th>ID</th><th>Guest</th><th>Room</th><th>Dates</th><th>Action</th></tr>
@@ -130,12 +180,12 @@
 
       <div class="col-right">
         <div class="card">
-          <h3><i class="fas fa-bed"></i> Room Popularity</h3>
+          <h3>Room Popularity</h3>
           <div id="piechart" style="height:200px;">Loading...</div>
         </div>
 
-        <div class="card" style="border-top:4px solid #e74c3c;">
-          <h3><i class="fas fa-wallet"></i> Add Expense</h3>
+        <div class="card" style="border-top: 4px solid #e74c3c;">
+          <h3>Add Expense</h3>
           <form onsubmit="addExpense(event)">
             <label>Category</label>
             <select id="exCat">
@@ -145,44 +195,38 @@
               <option>Marketing</option>
               <option>Other</option>
             </select>
-
             <label>Amount ($)</label>
-            <input type="number" id="exAmount" step="0.01" required>
-
-            <button type="submit" class="btn-del">Record Expense</button>
+            <input type="number" id="exAmount" step="0.01" required placeholder="0.00">
+            <button type="submit" class="btn-del" style="width:100%; margin-top:10px;">Record Expense</button>
           </form>
         </div>
 
-        <div class="card" style="background:#1b2838;">
-          <h3><i class="fas fa-coins"></i> Net Profit</h3>
-          <h1 id="profitDisplay">Loading...</h1>
-          <small id="expenseDisplay">Expenses: $0.00</small>
+        <div class="card" style="border-top: 4px solid #2ecc71;">
+          <h3>Net Profit</h3>
+          <h1 id="profitDisplay" style="font-size:2.5em; margin:10px 0;">Loading...</h1>
+          <small id="expenseDisplay" style="color: rgba(255,255,255,0.6);">Expenses: $0.00</small>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- USER MANAGEMENT SECTION -->
   <div id="users" class="section">
     <div class="dashboard-grid">
       <div class="col-right">
-        <div class="card" style="border-top:4px solid #2980b9;">
-          <h3><i class="fas fa-user-plus"></i> Add User</h3>
+        <div class="card" style="border-top: 4px solid #3498db;">
+          <h3>Add User</h3>
           <form onsubmit="addUser(event)">
-            <label>Name</label><input type="text" id="uName" required>
-            <label>Email</label><input type="email" id="uEmail" required>
+            <label>Name</label><input type="text" id="uName" required placeholder="Full Name">
+            <label>Email</label><input type="email" id="uEmail" required placeholder="user@oceanview.com">
             <button type="submit" class="btn-add">Create User</button>
           </form>
         </div>
       </div>
-
       <div class="col-left">
         <div class="card">
-          <h3><i class="fas fa-users-cog"></i> System Users</h3>
-          <table>
-            <thead>
-            <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr>
-            </thead>
+          <h3>System Users</h3>
+          <table id="userTable">
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr></thead>
             <tbody id="userBody"><tr><td colspan="5">Loading users...</td></tr></tbody>
           </table>
         </div>
@@ -203,7 +247,110 @@
     event.currentTarget.classList.add('active');
   }
 
-  // Existing JS functions remain unchanged (loadAnalytics, addExpense, loadUsers, addUser, deleteUser, logout, printInv)
+  async function loadAnalytics() {
+    try {
+      const res = await fetch('adminData');
+      const data = await res.json();
+
+      const darkOptions = {
+        backgroundColor: 'transparent',
+        legend: { textStyle: { color: '#ffffff' }, position: 'bottom' },
+        titleTextStyle: { color: '#ffffff' },
+        hAxis: { textStyle: { color: '#ffffff' }, gridlines: { color: 'rgba(255,255,255,0.1)' } },
+        vAxis: { textStyle: { color: '#ffffff' }, gridlines: { color: 'rgba(255,255,255,0.1)' } },
+        pieSliceBorderColor: 'transparent'
+      };
+
+      var pie = new google.visualization.DataTable();
+      pie.addColumn('string', 'Type'); pie.addColumn('number', 'Count');
+      data.pieData.forEach(d => pie.addRow([d.type, d.count]));
+      const pieOptions = { ...darkOptions, pieHole:0.4, colors:['#3498db','#e74c3c','#f1c40f'] };
+      new google.visualization.PieChart(document.getElementById('piechart')).draw(pie, pieOptions);
+
+      var bar = new google.visualization.DataTable();
+      bar.addColumn('string','Type'); bar.addColumn('number','Revenue');
+      let totalRevenue = 0;
+      data.barData.forEach(d=>{ bar.addRow([d.type,d.revenue]); totalRevenue+=d.revenue; });
+      const barOptions = { ...darkOptions, legend:'none', colors:['#2ecc71'] };
+      new google.visualization.ColumnChart(document.getElementById('barchart')).draw(bar, barOptions);
+
+      const totalExpenses = data.totalExpenses || 0;
+      const profit = totalRevenue - totalExpenses;
+      document.getElementById('profitDisplay').innerText = "$"+profit.toFixed(2);
+      document.getElementById('expenseDisplay').innerText = "Total Expenses: $"+totalExpenses.toFixed(2);
+      document.getElementById('profitDisplay').style.color = profit>=0?'#2ecc71':'#e74c3c';
+
+      const tbody = document.getElementById('invBody'); tbody.innerHTML='';
+      if(data.invoices && data.invoices.length>0){
+        data.invoices.forEach(i=>{
+          tbody.innerHTML+=`<tr>
+            <td>#${i.id}</td>
+            <td>${i.customer}</td>
+            <td>${i.room}</td>
+            <td><small>${i.checkIn}<br>${i.checkOut}</small></td>
+            <td><button class="btn-inv" onclick="printInv(${i.id}, '${i.customer}', '${i.room}', '${i.checkIn}', '${i.checkOut}', ${i.price})">Invoice</button></td>
+          </tr>`;
+        });
+      } else { tbody.innerHTML='<tr><td colspan="5" style="color:rgba(255,255,255,0.5)">No bookings yet.</td></tr>'; }
+    } catch(e){ console.error("Analytics Error:",e); }
+  }
+
+  async function addExpense(e){ e.preventDefault();
+    const params=new URLSearchParams();
+    params.append('category',document.getElementById('exCat').value);
+    params.append('amount',document.getElementById('exAmount').value);
+    try{
+      const res=await fetch('addExpense',{method:'POST',body:params});
+      const json=await res.json();
+      if(json.status==='success'){ alert("Expense Saved"); document.getElementById('exAmount').value=""; loadAnalytics(); }
+      else alert("Error saving expense");
+    }catch(e){ alert("Server Error"); }
+  }
+
+  async function loadUsers() {
+    const tbody=document.getElementById('userBody'); tbody.innerHTML='';
+    try{
+      const res=await fetch('userManagement'); if(!res.ok) throw new Error("API Error");
+      const users=await res.json();
+      users.forEach(u=>{
+        const badgeClass=u.role==='ADMIN'?'role-ADMIN':'role-RECEPTIONIST';
+        tbody.innerHTML+=`<tr>
+          <td>#${u.id}</td>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td><span class="role-badge ${badgeClass}">${u.role}</span></td>
+          <td><button class="btn-del" onclick="deleteUser(${u.id})">Delete</button></td>
+        </tr>`;
+      });
+    }catch(e){ tbody.innerHTML='<tr><td colspan="5" style="color:#e74c3c">Error loading users</td></tr>'; }
+  }
+
+  async function addUser(e){
+    e.preventDefault();
+    const params=new URLSearchParams();
+    params.append('name',document.getElementById('uName').value);
+    params.append('email',document.getElementById('uEmail').value);
+    try{
+      const res=await fetch('register',{method:'POST',body:params});
+      const json=await res.json();
+      if(json.status==='success'){ alert("User Created"); loadUsers(); }
+      else alert("Error: "+json.message);
+    }catch(e){ alert("Server Error"); }
+  }
+
+  async function deleteUser(id){
+    if(!confirm("Delete this user?")) return;
+    const params=new URLSearchParams(); params.append('action','delete'); params.append('id',id);
+    await fetch('userManagement',{method:'POST',body:params}); loadUsers();
+  }
+
+  function printInv(id,name,room,inDate,outDate,price){
+    const total=price;
+    const url=`print_receipt.html?id=${id}&name=${encodeURIComponent(name)}&room=${encodeURIComponent(room)}&in=${inDate}&out=${outDate}&price=${price}&total=${total}`;
+    window.open(url,'_blank');
+  }
+
+  async function logout(){ await fetch('logout'); window.location.href='login_app.html'; }
 </script>
 </body>
 </html>
