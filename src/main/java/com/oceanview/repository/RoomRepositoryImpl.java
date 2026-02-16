@@ -58,4 +58,25 @@ public class RoomRepositoryImpl implements RoomRepository {
         }
         return null;
     }
+    // Add this to your RoomRepositoryImpl
+    public List<Room> findAll() throws SQLException {
+        List<Room> rooms = new ArrayList<>();
+        String sql = "SELECT * FROM rooms ORDER BY room_number";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                rooms.add(new Room(
+                        rs.getInt("id"),
+                        rs.getString("room_number"),
+                        rs.getString("room_type"),
+                        rs.getDouble("price_per_night"),
+                        true, // Available default
+                        rs.getString("image_url"),
+                        rs.getString("description")
+                ));
+            }
+        }
+        return rooms;
+    }
 }

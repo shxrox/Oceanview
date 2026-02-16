@@ -37,4 +37,15 @@ public class RoomService {
             return null;
         }
     }
+
+    // Add this to your existing RoomService class
+    public List<Room> getAllRooms() {
+        try {
+            // We can reuse the Repository's finding logic or add a findAll there.
+            // For simplicity, let's assume we add findAll() to RoomRepository.
+            return new com.oceanview.repository.RoomRepositoryImpl().findAll();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
 }
