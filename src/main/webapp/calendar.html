@@ -3,67 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <title>Room Availability</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f6f7; }
-        .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-x: auto; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body { height:100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .legend { display: flex; gap: 20px; font-weight: bold; font-size: 14px; margin-bottom: 10px; }
-        .dot { width: 15px; height: 15px; display: inline-block; border-radius: 3px; vertical-align: middle; margin-right: 5px; }
-
-        /* THE TABLE */
-        table { border-collapse: collapse; width: 100%; font-size: 12px; }
-        th, td { border: 1px solid #ddd; padding: 0; text-align: center; height: 35px; min-width: 30px; }
-
-        /* Header Row (Days) */
-        th { background: #2c3e50; color: white; position: sticky; top: 0; z-index: 10; }
-
-        /* First Column (Room Names) */
-        .room-col {
-            background: #ecf0f1;
-            font-weight: bold;
-            text-align: left;
-            padding: 0 10px;
-            min-width: 120px;
-            position: sticky;
-            left: 0;
-            border-right: 2px solid #bdc3c7;
-            z-index: 5;
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            display: flex;
+            flex-direction: column;
+            color: #f0f8ff;
+            overflow: hidden;
         }
 
-        /* STATUS COLORS */
+        /* Animated gradient background */
+        body::before {
+            content:'';
+            position: absolute;
+            top:0; left:0; right:0; bottom:0;
+            background: linear-gradient(270deg, #0f2027, #203a43, #2c5364, #0f2027);
+            background-size: 800% 800%;
+            animation: gradientShift 20s ease infinite;
+            z-index:0;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .header {
+            position: relative;
+            z-index:1;
+            display:flex;
+            justify-content: space-between;
+            align-items:center;
+            padding:20px 40px;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h2 { color:#00c6ff; }
+        .header a {
+            text-decoration:none;
+            color:#f0f8ff;
+            background: rgba(0,0,0,0.3);
+            padding:8px 15px;
+            border-radius:6px;
+            transition:0.3s;
+        }
+        .header a:hover { background: rgba(0,198,255,0.5); }
+
+        .filters select {
+            padding:8px 12px;
+            border-radius:6px;
+            border:none;
+            margin-left:10px;
+            font-size:14px;
+        }
+
+        .legend {
+            margin: 10px 40px;
+            display:flex;
+            gap:20px;
+            font-weight:bold;
+            font-size:14px;
+            z-index:1;
+            position:relative;
+        }
+        .dot { width:15px; height:15px; display:inline-block; border-radius:3px; vertical-align:middle; margin-right:5px; }
+
+        .table-container {
+            flex:1;
+            padding:20px 40px;
+            overflow:auto;
+            z-index:1;
+            position:relative;
+        }
+
+        table {
+            border-collapse: collapse;
+            width:100%;
+            min-width:700px;
+            font-size:12px;
+            background: rgba(255,255,255,0.05);
+            border-radius:8px;
+            overflow:hidden;
+        }
+        th, td { border:1px solid rgba(255,255,255,0.2); padding:0; text-align:center; height:35px; min-width:30px; }
+        th { background:#2c3e50; color:white; position: sticky; top:0; z-index:10; }
+
+        .room-col {
+            background: rgba(236,240,241,0.9);
+            font-weight:bold;
+            text-align:left;
+            padding-left:10px;
+            min-width:120px;
+            position: sticky;
+            left:0;
+            border-right:2px solid rgba(189,195,199,0.5);
+            z-index:5;
+        }
+
+        .type-header {
+            background: #3498db;
+            color:white;
+            font-weight:bold;
+            text-align:left;
+            padding-left:10px;
+        }
+
         .free { background-color: #eafaf1; } /* Light Green */
-        .booked { background-color: #e74c3c; cursor: pointer; color: white; font-size: 10px; } /* Red */
-        .weekend { background-color: #fef9e7; } /* Light Yellow (Weekend Guide) */
+        .booked { background-color: #e74c3c; cursor:pointer; color:white; font-size:10px; transition:0.2s; }
+        .booked:hover { opacity:0.8; }
+        .weekend { background-color: #fef9e7; } /* Light Yellow for weekends */
 
-        .booked:hover { opacity: 0.8; }
+        /* Responsive */
+        @media(max-width:768px){
+            .header { flex-direction: column; align-items:flex-start; }
+            .filters { margin-top:10px; }
+            .table-container { padding:10px 20px; }
+        }
 
-        /* Room Type Section Header */
-        .type-header { background: #3498db; color: white; font-weight: bold; text-align: left; padding-left: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header">
-        <div>
-            <a href="receptionist_dashboard.html" style="text-decoration:none; color:#7f8c8d; font-weight:bold;">&larr; Dashboard</a>
-            <h2 style="display:inline; margin-left: 15px; color: #2c3e50;">Availability Calendar</h2>
-        </div>
-
-        <div>
-            <select id="monthSelect" onchange="renderCalendar()"></select>
-            <select id="yearSelect" onchange="renderCalendar()"></select>
-        </div>
+<div class="header">
+    <div>
+        <a href="receptionist_dashboard.html">&larr; Dashboard</a>
+        <h2 style="display:inline; margin-left:15px;">Availability Calendar</h2>
     </div>
-
-    <div class="legend">
-        <span><span class="dot" style="background:#eafaf1; border:1px solid #ccc;"></span>Available</span>
-        <span><span class="dot" style="background:#e74c3c;"></span>Occupied</span>
+    <div class="filters">
+        <select id="monthSelect" onchange="renderCalendar()"></select>
+        <select id="yearSelect" onchange="renderCalendar()"></select>
     </div>
+</div>
 
-    <table id="calTable">
-    </table>
+<div class="legend">
+    <span><span class="dot" style="background:#eafaf1; border:1px solid #ccc;"></span>Available</span>
+    <span><span class="dot" style="background:#e74c3c;"></span>Occupied</span>
+</div>
+
+<div class="table-container">
+    <table id="calTable"></table>
 </div>
 
 <script>
@@ -71,93 +154,59 @@
     const monthSel = document.getElementById('monthSelect');
     const yearSel = document.getElementById('yearSelect');
 
-    // 1. Setup Dropdowns
-    const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     const now = new Date();
+    months.forEach((m,i)=>monthSel.innerHTML += `<option value="${i}" ${i===now.getMonth()?'selected':''}>${m}</option>`);
+    for(let y=2025; y<=2028; y++) yearSel.innerHTML += `<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}</option>`;
 
-    months.forEach((m, i) => {
-        monthSel.innerHTML += `<option value="${i}" ${i === now.getMonth() ? 'selected' : ''}>${m}</option>`;
-    });
-    for(let y = 2025; y <= 2028; y++) {
-        yearSel.innerHTML += `<option value="${y}" ${y === now.getFullYear() ? 'selected' : ''}>${y}</option>`;
-    }
-
-    // 2. MAIN RENDER LOGIC
-    async function renderCalendar() {
-        table.innerHTML = "<tr><td colspan='32'>Loading...</td></tr>";
-
+    async function renderCalendar(){
+        table.innerHTML="<tr><td colspan='32'>Loading...</td></tr>";
         const month = parseInt(monthSel.value);
         const year = parseInt(yearSel.value);
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInMonth = new Date(year, month+1,0).getDate();
 
-        try {
+        try{
             const res = await fetch('calendarData');
             const rooms = await res.json();
+            let html="";
 
-            let html = "";
+            html += "<thead><tr><th class='room-col'>Room</th>";
+            for(let d=1; d<=daysInMonth; d++) html+=`<th>${d}</th>`;
+            html+="</tr></thead><tbody>";
 
-            // --- HEADER ROW (Days 1 to 31) ---
-            html += "<thead><tr><th class='room-col' style='background:#2c3e50; color:white;'>Room</th>";
-            for(let d=1; d<=daysInMonth; d++) {
-                html += `<th>${d}</th>`;
-            }
-            html += "</tr></thead><tbody>";
-
-            // --- ROOM ROWS ---
-            let currentType = "";
-
-            rooms.forEach(room => {
-                // Add a Section Header if Room Type changes (e.g. "Single", "Double")
-                if(room.type !== currentType) {
-                    currentType = room.type;
-                    html += `<tr><td class="type-header" colspan="${daysInMonth + 1}">${currentType.toUpperCase()} ROOMS</td></tr>`;
+            let currentType="";
+            rooms.forEach(room=>{
+                if(room.type!==currentType){
+                    currentType=room.type;
+                    html+=`<tr><td class='type-header' colspan='${daysInMonth+1}'>${currentType.toUpperCase()} ROOMS</td></tr>`;
                 }
 
-                html += "<tr>";
-                html += `<td class="room-col">Room ${room.number}</td>`;
+                html+="<tr>";
+                html+=`<td class='room-col'>Room ${room.number}</td>`;
 
-                // Loop through every day of the month
-                for(let d=1; d<=daysInMonth; d++) {
-                    const dateStr = `${year}-${String(month+1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                for(let d=1; d<=daysInMonth; d++){
+                    const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                    let statusClass="free", tooltip="Available";
+                    const dayOfWeek = new Date(year,month,d).getDay();
+                    if(dayOfWeek===0||dayOfWeek===6) statusClass="weekend";
 
-                    // Check Status
-                    let statusClass = "free";
-                    let tooltip = "Available";
-
-                    // Highlight Weekends lightly
-                    const dayOfWeek = new Date(year, month, d).getDay();
-                    if(dayOfWeek === 0 || dayOfWeek === 6) statusClass = "weekend";
-
-                    // Check if Booked
-                    // We check if the current day 'd' is inside any reservation range
-                    // NOTE: Check-out day is usually considered "Free" for the next guest to arrive
-                    room.bookings.forEach(bk => {
-                        const start = new Date(bk.start); // Check-in
-                        const end = new Date(bk.end);     // Check-out
-                        const current = new Date(year, month, d);
-
-                        // If current date is >= start AND current date < end
-                        if (current >= start && current < end) {
-                            statusClass = "booked";
-                            tooltip = `Guest: ${bk.guest}`;
-                        }
+                    room.bookings.forEach(bk=>{
+                        const start=new Date(bk.start), end=new Date(bk.end), current=new Date(year,month,d);
+                        if(current>=start && current<end){ statusClass="booked"; tooltip=`Guest: ${bk.guest}`; }
                     });
 
-                    // Render Cell
-                    html += `<td class="${statusClass}" title="${tooltip}"></td>`;
+                    html+=`<td class="${statusClass}" title="${tooltip}"></td>`;
                 }
-                html += "</tr>";
+                html+="</tr>";
             });
-            html += "</tbody>";
-            table.innerHTML = html;
-
-        } catch(e) {
+            html+="</tbody>";
+            table.innerHTML=html;
+        } catch(e){
             console.error(e);
-            table.innerHTML = "<tr><td colspan='32'>Error loading data.</td></tr>";
+            table.innerHTML="<tr><td colspan='32'>Error loading data.</td></tr>";
         }
     }
 
-    // Load on start
     renderCalendar();
 </script>
 
