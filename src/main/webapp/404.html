@@ -3,12 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <title>Page Not Found</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      color: #ffffff;
+      padding: 20px;
+    }
+
+    .wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .error-image {
+      width: 220px;
+      max-width: 70%;
+      margin-bottom: 25px;
+      animation: float 4s ease-in-out infinite;
+      filter: drop-shadow(0 10px 25px rgba(0, 180, 255, 0.3));
+    }
+
+    .error-code {
+      font-size: 110px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 10px;
+      text-shadow: 0 0 25px rgba(0, 150, 255, 0.3);
+    }
+
+    h2 {
+      font-size: 26px;
+      margin-bottom: 15px;
+      font-weight: 600;
+      color: #dff6ff;
+    }
+
+    p {
+      font-size: 15px;
+      color: #cceeff;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(0, 150, 255, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px rgba(0, 150, 255, 0.5);
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+      100% { transform: translateY(0px); }
+    }
+
+    /* Mobile */
+    @media (max-width: 480px) {
+      .error-code {
+        font-size: 75px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      p {
+        font-size: 14px;
+      }
+
+      .error-image {
+        width: 160px;
+      }
+    }
+  </style>
 </head>
-<body style="text-align: center; padding-top: 80px; font-family: sans-serif; background-color: #f4f6f7;">
-<h1 style="font-size: 100px; color: #e74c3c; margin: 0;">404</h1>
-<h2 style="color: #2c3e50;">Page Not Found</h2>
-<p style="color: #7f8c8d;">Sorry, the page you are looking for does not exist or has been moved.</p>
-<br>
-<a href="login_app.html" style="padding: 12px 25px; background: #3498db; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Go to Login</a>
+
+<body>
+
+<div class="wrapper">
+
+  <img src="images/icon4.png" alt="Connection Lost" class="error-image">
+
+  <div class="error-code">404</div>
+
+  <h2>Connection Lost / Page Not Found</h2>
+
+  <p>
+    It looks like your connection has been disconnected or the page you're trying to access is unavailable.
+    Please check your network or return to the login page.
+  </p>
+
+  <a href="login_app.html" class="btn">Go to Login</a>
+
+</div>
+
 </body>
 </html>
