@@ -3,7 +3,7 @@ package com.oceanview.service;
 import com.oceanview.repository.*;
 import com.oceanview.model.Reservation;
 import com.oceanview.model.Room;
-import com.oceanview.model.User; // Import User for profile update
+import com.oceanview.model.User;
 
 import java.sql.Date;
 import java.sql.SQLException;
@@ -11,12 +11,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit; // Needed for date calculation
+import java.util.concurrent.TimeUnit;
 
 public class ReservationService {
     private ReservationRepository reservationRepository;
-    private RoomRepository roomRepository; // Used to get Room Price
-    private UserRepository userRepository; // Used for Profile Update
+    private RoomRepository roomRepository;
+    private UserRepository userRepository;
     private EmailService emailService;
 
     public ReservationService() {
@@ -26,28 +26,34 @@ public class ReservationService {
         this.emailService = new EmailService();
     }
 
-    // --- 1. PROCESS BOOKING (With Price Calculation) ---
+    // --- 1. PROCESS BOOKING (With Price Calculation + Email + SMS) ---
     public boolean processBooking(int roomId, String name, String email, String phone, Date checkIn, Date checkOut) {
         try {
-            // A. Save the Reservation
+            // A. Create Reservation Object
             Reservation res = new Reservation(roomId, name, email, phone, checkIn, checkOut);
+
+            // B. Save to Database
             boolean isSaved = reservationRepository.save(res);
 
             if (isSaved) {
-                // B. Calculate Total Price (Days * PricePerNight)
+                // C. Calculate Total Price
                 Room room = roomRepository.findById(roomId);
 
                 long diffInMillies = Math.abs(checkOut.getTime() - checkIn.getTime());
                 long diffDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
 
-                // Ensure at least 1 day counts (even if same day booking)
-                if (diffDays < 1) diffDays = 1;
+                if (diffDays < 1) diffDays = 1; // Minimum 1 night charge
 
                 double totalAmount = diffDays * room.getPricePerNight();
 
-                // C. Send Email with the Total Amount
+                // D. Send Notifications
+
+                // 1. Send Email
                 emailService.sendBookingConfirmation(res, totalAmount, room.getRoomNumber());
-                emailService.sendSMS(phone, "Booking Confirmed! Room " + room.getRoomNumber() + ". Total: $" + totalAmount);
+
+                // 2. Send SMS
+                String smsMessage = "OceanView: Confirmed! Room " + room.getRoomNumber() + " is booked. Total: $" + String.format("%.2f", totalAmount);
+                emailService.sendSMS(phone, smsMessage);
 
                 return true;
             }
@@ -69,7 +75,7 @@ public class ReservationService {
         return userRepository.update(currentUser);
     }
 
-    // --- 3. OTHER METHODS (Keep these as they are) ---
+    // --- 3. OTHER METHODS ---
     public List<Reservation> getAllReservations() {
         try { return reservationRepository.findAll(); }
         catch (SQLException e) { return Collections.emptyList(); }
