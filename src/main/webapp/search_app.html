@@ -4,28 +4,52 @@
   <meta charset="UTF-8">
   <title>Find Rooms</title>
   <style>
-    body { background: #f4f6f7; padding: 30px; font-family: sans-serif; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .search-bar { display: flex; gap: 10px; margin-bottom: 20px; background: #ecf0f1; padding: 15px; border-radius: 5px; align-items: flex-end; }
-    .field-group { flex: 1; display: flex; flex-direction: column; }
-    label { font-size: 12px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; }
-    input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-    button { background: #3498db; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    body { background: #f4f6f7; padding: 30px; font-family: 'Segoe UI', sans-serif; }
+    .container { max-width: 1000px; margin: 0 auto; }
+
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h2 { color: #2c3e50; }
+    a { text-decoration: none; color: #7f8c8d; font-weight: bold; }
+
+    /* Search Bar */
+    .search-bar { display: flex; gap: 15px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; align-items: flex-end; }
+    .field-group { flex: 1; }
+    label { display: block; font-size: 12px; font-weight: bold; color: #7f8c8d; margin-bottom: 5px; text-transform: uppercase; }
+    input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+    button { background: #3498db; color: white; border: none; padding: 12px 25px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; height: 42px; }
     button:hover { background: #2980b9; }
 
-    .room-card { display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 5px; transition: 0.2s; }
-    .room-card:hover { border-color: #3498db; background: #fdfdfd; }
-    .price { color: #27ae60; font-weight: bold; font-size: 1.2em; }
-    .book-btn { background: #27ae60; color: white; border: none; padding: 8px 15px; border-radius: 3px; cursor: pointer; }
+    /* Results Grid */
+    #results { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+
+    /* Room Card */
+    .room-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.2s; border: 1px solid #eee; display: flex; flex-direction: column; }
+    .room-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+    .room-img { width: 100%; height: 200px; object-fit: cover; background: #ecf0f1; }
+
+    .card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+    .card-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+    .room-title { font-size: 1.2em; font-weight: bold; color: #2c3e50; margin: 0; }
+    .room-type { background: #ecf0f1; color: #7f8c8d; padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
+
+    .description { color: #666; font-size: 0.9em; line-height: 1.5; margin-bottom: 20px; flex: 1; }
+
+    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f4f4f4; padding-top: 15px; margin-top: auto; }
+    .price { color: #27ae60; font-weight: bold; font-size: 1.4em; }
+    .per-night { font-size: 0.5em; color: #95a5a6; font-weight: normal; }
+
+    .book-btn { background: #27ae60; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; }
     .book-btn:hover { background: #219150; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div style="display: flex; justify-content: space-between; align-items: center;">
+  <div class="header">
     <h2>Find Available Rooms</h2>
-    <a href="receptionist_dashboard.html" style="color: #7f8c8d; text-decoration: none;">&larr; Back</a>
+    <a href="receptionist_dashboard.html">&larr; Back to Dashboard</a>
   </div>
 
   <div class="search-bar">
@@ -37,42 +61,31 @@
       <label>Check-Out Date</label>
       <input type="date" id="checkOut">
     </div>
-    <button onclick="searchRooms()">Search Rooms</button>
+    <button onclick="searchRooms()">SEARCH ROOMS</button>
   </div>
 
   <div id="results">
-    <p style="text-align: center; color: #95a5a6;">Select dates to begin.</p>
+    <p style="grid-column: 1/-1; text-align: center; color: #95a5a6; padding: 40px;">Select dates to browse our collection.</p>
   </div>
 </div>
 
 <script>
-  // --- 1. INITIALIZE DATE CONSTRAINTS ---
+  // --- DATE CONSTRAINTS ---
   window.onload = function() {
     const checkIn = document.getElementById('checkIn');
     const checkOut = document.getElementById('checkOut');
-
-    // Get Today's Date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
 
-    // Rule 1: Prevent Past Dates
     checkIn.setAttribute('min', today);
     checkOut.setAttribute('min', today);
 
-    // Rule 2: Update Check-Out Constraint when Check-In Changes
     checkIn.addEventListener('change', function() {
       if (this.value) {
-        // Determine the next day
         const selectedDate = new Date(this.value);
         selectedDate.setDate(selectedDate.getDate() + 1);
         const nextDay = selectedDate.toISOString().split('T')[0];
-
-        // Set Check-Out MIN to be at least one day after Check-In
         checkOut.setAttribute('min', nextDay);
-
-        // If the current checkout is now invalid (before checkin), clear it
-        if (checkOut.value && checkOut.value < nextDay) {
-          checkOut.value = "";
-        }
+        if (checkOut.value && checkOut.value < nextDay) checkOut.value = "";
       }
     });
   }
@@ -82,40 +95,41 @@
     const checkOut = document.getElementById('checkOut').value;
     const results = document.getElementById('results');
 
-    // Validation: Ensure Check-Out is AFTER Check-In
-    if (!checkIn || !checkOut) {
-      alert("Please select both dates!");
-      return;
-    }
-    if (checkOut <= checkIn) {
-      alert("Check-Out date must be after Check-In date!");
-      return;
-    }
+    if (!checkIn || !checkOut) { alert("Please select dates!"); return; }
+    if (checkOut <= checkIn) { alert("Check-Out must be after Check-In!"); return; }
 
-    results.innerHTML = "Loading...";
+    results.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Searching availability...</p>';
 
     try {
       const response = await fetch(`searchRooms?checkIn=${checkIn}&checkOut=${checkOut}`);
       const rooms = await response.json();
       results.innerHTML = "";
 
-      if (rooms.length === 0) results.innerHTML = "<p>No rooms available for these dates.</p>";
-      else {
+      if (rooms.length === 0) {
+        results.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #e74c3c;">No rooms available for these dates.</p>';
+      } else {
         rooms.forEach(r => {
           results.innerHTML += `
                         <div class="room-card">
-                            <div>
-                                <h3>Room ${r.number}</h3>
-                                <p style="color: #666;">${r.type} Suite</p>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="price">$${r.price} <span style="font-size:0.6em; color:#999;">/night</span></div>
-                                <button class="book-btn" onclick="bookRoom(${r.id}, '${r.number}', ${r.price})">Book Now</button>
+                            <img src="${r.image}" class="room-img" alt="Room Image">
+                            <div class="card-body">
+                                <div class="card-top">
+                                    <h3 class="room-title">Room ${r.number}</h3>
+                                    <span class="room-type">${r.type}</span>
+                                </div>
+                                <p class="description">${r.description}</p>
+                                <div class="card-footer">
+                                    <div class="price">$${r.price}<span class="per-night">/night</span></div>
+                                    <button class="book-btn" onclick="bookRoom(${r.id}, '${r.number}', ${r.price})">Book Now</button>
+                                </div>
                             </div>
                         </div>`;
         });
       }
-    } catch (e) { results.innerHTML = "Error fetching data."; }
+    } catch (e) {
+      console.error(e);
+      results.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Error fetching data.</p>';
+    }
   }
 
   function bookRoom(id, num, price) {

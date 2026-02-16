@@ -22,6 +22,7 @@ public class SearchRoomsServlet extends HttpServlet {
             throws ServletException, IOException {
 
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8"); // Important for descriptions
         PrintWriter out = response.getWriter();
 
         try {
@@ -32,13 +33,22 @@ public class SearchRoomsServlet extends HttpServlet {
             StringBuilder json = new StringBuilder("[");
             for (int i = 0; i < rooms.size(); i++) {
                 Room r = rooms.get(i);
-                json.append(String.format("{\"id\":%d,\"number\":\"%s\",\"type\":\"%s\",\"price\":%.2f}",
-                        r.getId(), r.getRoomNumber(), r.getRoomType(), r.getPricePerNight()));
+
+                // Safety: Handle nulls for old database rows
+                String img = (r.getImageUrl() != null) ? r.getImageUrl() : "https://via.placeholder.com/300";
+                String desc = (r.getDescription() != null) ? r.getDescription().replace("\"", "\\\"") : "No description available.";
+
+                json.append(String.format(
+                        "{\"id\":%d, \"number\":\"%s\", \"type\":\"%s\", \"price\":%.2f, \"image\":\"%s\", \"description\":\"%s\"}",
+                        r.getId(), r.getRoomNumber(), r.getRoomType(), r.getPricePerNight(), img, desc
+                ));
+
                 if (i < rooms.size() - 1) json.append(",");
             }
             json.append("]");
             out.print(json.toString());
         } catch (Exception e) {
+            e.printStackTrace();
             out.print("[]");
         }
     }

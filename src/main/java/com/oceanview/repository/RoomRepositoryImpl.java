@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RoomRepositoryImpl implements RoomRepository {
+
     @Override
     public List<Room> findAvailableRooms(Date checkIn, Date checkOut) throws SQLException {
         List<Room> rooms = new ArrayList<>();
-        // Logic: Select rooms NOT inside the reservations table for these dates
         String sql = "SELECT * FROM rooms WHERE id NOT IN (" +
                 "SELECT room_id FROM reservations WHERE " +
                 "(check_in < ? AND check_out > ?))";
@@ -26,7 +26,10 @@ public class RoomRepositoryImpl implements RoomRepository {
                         rs.getString("room_number"),
                         rs.getString("room_type"),
                         rs.getDouble("price_per_night"),
-                        true
+                        true,
+                        // NEW FIELDS
+                        rs.getString("image_url"),
+                        rs.getString("description")
                 ));
             }
         }
@@ -46,7 +49,10 @@ public class RoomRepositoryImpl implements RoomRepository {
                         rs.getString("room_number"),
                         rs.getString("room_type"),
                         rs.getDouble("price_per_night"),
-                        true
+                        true,
+                        // NEW FIELDS
+                        rs.getString("image_url"),
+                        rs.getString("description")
                 );
             }
         }

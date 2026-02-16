@@ -3,20 +3,25 @@ package com.oceanview.model;
 public class Room {
     private int id;
     private String roomNumber;
-    private String roomType; // "Single", "Double", "Suite"
+    private String roomType;
     private double pricePerNight;
     private boolean isAvailable;
 
-    // Default Constructor
+    // NEW FIELDS
+    private String imageUrl;
+    private String description;
+
     public Room() {}
 
-    // Full Constructor
-    public Room(int id, String roomNumber, String roomType, double pricePerNight, boolean isAvailable) {
+    // Updated Constructor
+    public Room(int id, String roomNumber, String roomType, double pricePerNight, boolean isAvailable, String imageUrl, String description) {
         this.id = id;
         this.roomNumber = roomNumber;
         this.roomType = roomType;
         this.pricePerNight = pricePerNight;
         this.isAvailable = isAvailable;
+        this.imageUrl = imageUrl;
+        this.description = description;
     }
 
     // Getters and Setters
@@ -34,4 +39,11 @@ public class Room {
 
     public boolean isAvailable() { return isAvailable; }
     public void setAvailable(boolean available) { isAvailable = available; }
+
+    // NEW GETTERS/SETTERS
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }
