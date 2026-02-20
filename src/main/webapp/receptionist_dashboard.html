@@ -5,7 +5,6 @@
   <title>Receptionist Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Font Awesome Icons -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
   <style>
@@ -144,6 +143,57 @@
       background: #1e8449;
     }
 
+    /* Search Bar Styles */
+    .search-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .search-container input {
+      margin-bottom: 0;
+      max-width: 300px;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+    }
+
+    .btn-search {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-search:hover {
+      background: #2980b9;
+    }
+
+    .btn-reset {
+      background: #7f8c8d;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-reset:hover {
+      background: #636e72;
+    }
+
     h3 {
       margin-bottom: 15px;
       font-weight: 500;
@@ -201,6 +251,14 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
+      }
+
+      .search-container {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-container input {
+        max-width: 100%;
       }
     }
   </style>
@@ -260,7 +318,17 @@
 
   <h3><i class="fas fa-list"></i> Recent Reservations</h3>
 
-  <table>
+  <div class="search-container">
+    <input type="text" id="searchResId" placeholder="Enter Reservation ID (e.g., 1001)">
+    <button onclick="searchReservation()" class="btn-search">
+      <i class="fas fa-search"></i> Search
+    </button>
+    <button onclick="resetSearch()" class="btn-reset">
+      <i class="fas fa-sync-alt"></i> Reset
+    </button>
+  </div>
+
+  <table id="reservationsTable">
     <thead>
     <tr>
       <th>ID</th><th>Room</th><th>Guest</th><th>Check-In</th><th>Check-Out</th><th>Action</th>
@@ -275,10 +343,12 @@
 
 <script>
   window.onload = async function() { loadReservations(); }
+
   function toggleProfile() {
     const sec = document.getElementById('profileSection');
     sec.style.display = (sec.style.display === 'block') ? 'none' : 'block';
   }
+
   async function updateProfile(e) {
     e.preventDefault();
     const newName = document.getElementById('pName').value;
@@ -297,6 +367,7 @@
       } else { alert("Error: " + json.message); }
     } catch (err) { alert("Server Error"); }
   }
+
   async function loadReservations() {
     const tableBody = document.getElementById('tableBody');
     try {
@@ -308,8 +379,8 @@
       else {
         data.forEach(res => {
           tableBody.innerHTML += `
-            <tr>
-              <td>#${res.id}</td>
+            <tr class="res-row">
+              <td class="res-id-cell">#${res.id}</td>
               <td><strong>${res.roomNumber}</strong></td>
               <td>${res.customerName}</td>
               <td>${res.checkIn}</td>
@@ -323,11 +394,54 @@
       tableBody.innerHTML = '<tr><td colspan="6" style="color:red;">Error loading data.</td></tr>';
     }
   }
+
+  // --- NEW JAVASCRIPT FOR SEARCH FEATURE ---
+  function searchReservation() {
+    const input = document.getElementById('searchResId').value.trim();
+    const rows = document.getElementsByClassName('res-row');
+    let found = false;
+
+    if (input === "") {
+      resetSearch();
+      return;
+    }
+
+    for (let i = 0; i < rows.length; i++) {
+      // Get the ID column (the first <td>)
+      const idCell = rows[i].getElementsByClassName('res-id-cell')[0];
+      if (idCell) {
+        // Remove the "#" for comparison
+        const idText = idCell.innerText.replace('#', '').trim();
+        if (idText === input) {
+          rows[i].style.display = ""; // Show matching row
+          found = true;
+        } else {
+          rows[i].style.display = "none"; // Hide non-matching rows
+        }
+      }
+    }
+
+    if (!found) {
+      alert("No reservation found with ID: " + input);
+      resetSearch();
+    }
+  }
+
+  function resetSearch() {
+    document.getElementById('searchResId').value = "";
+    const rows = document.getElementsByClassName('res-row');
+    for (let i = 0; i < rows.length; i++) {
+      rows[i].style.display = ""; // Show all rows again
+    }
+  }
+  // ------------------------------------------
+
   async function cancelBooking(id) {
     if(!confirm("Cancel this booking?")) return;
     await fetch('cancelReservation?id=' + id, { method: 'POST' });
     loadReservations();
   }
+
   async function logout() {
     await fetch('logout');
     window.location.href = 'login_app.html';
