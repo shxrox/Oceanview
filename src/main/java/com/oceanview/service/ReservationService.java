@@ -26,6 +26,14 @@ public class ReservationService {
         this.emailService = new EmailService();
     }
 
+    // --- NEW METHOD ADDED FOR TDD TESTING ---
+    public double calculateTotalBill(long nights, double pricePerNight) {
+        if (nights < 1 || nights > 30) {
+            throw new IllegalArgumentException("Booking duration must be between 1 and 30 nights.");
+        }
+        return nights * pricePerNight;
+    }
+
     // --- 1. PROCESS BOOKING (With Price Calculation + Email + SMS) ---
     public boolean processBooking(int roomId, String name, String email, String phone, Date checkIn, Date checkOut) {
         try {
@@ -42,12 +50,16 @@ public class ReservationService {
                 long diffInMillies = Math.abs(checkOut.getTime() - checkIn.getTime());
                 long diffDays = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
 
-                if (diffDays < 1) diffDays = 1; // Minimum 1 night charge
-
-                double totalAmount = diffDays * room.getPricePerNight();
+                // REFACTORED: Now we use the method we wrote our JUnit tests for!
+                double totalAmount;
+                try {
+                    totalAmount = calculateTotalBill(diffDays, room.getPricePerNight());
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Booking failed: " + e.getMessage());
+                    return false; // Stop the booking if days are invalid
+                }
 
                 // D. Send Notifications
-
                 // 1. Send Email
                 emailService.sendBookingConfirmation(res, totalAmount, room.getRoomNumber());
 
