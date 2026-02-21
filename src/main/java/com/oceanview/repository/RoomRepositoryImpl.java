@@ -90,7 +90,6 @@ public class RoomRepositoryImpl implements RoomRepository {
         }
     }
 
-    // NEW METHOD: Update all details
     @Override
     public boolean updateRoom(Room room) throws SQLException {
         String sql = "UPDATE rooms SET room_number=?, room_type=?, price_per_night=?, image_url=?, description=? WHERE id=?";
@@ -102,6 +101,17 @@ public class RoomRepositoryImpl implements RoomRepository {
             stmt.setString(4, room.getImageUrl());
             stmt.setString(5, room.getDescription());
             stmt.setInt(6, room.getId());
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    // NEW METHOD: Delete Room
+    @Override
+    public boolean delete(int id) throws SQLException {
+        String sql = "DELETE FROM rooms WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         }
     }

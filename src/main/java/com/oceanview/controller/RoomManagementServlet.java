@@ -67,7 +67,6 @@ public class RoomManagementServlet extends HttpServlet {
                 newRoom.setPricePerNight(Double.parseDouble(request.getParameter("price")));
                 newRoom.setDescription(request.getParameter("description"));
 
-                // Handle Image Upload
                 Part filePart = request.getPart("image");
                 String imagePath = uploadImage(filePart, request);
                 newRoom.setImageUrl(imagePath != null ? imagePath : "images/icon1.png");
@@ -85,7 +84,6 @@ public class RoomManagementServlet extends HttpServlet {
                     existingRoom.setPricePerNight(Double.parseDouble(request.getParameter("price")));
                     existingRoom.setDescription(request.getParameter("description"));
 
-                    // Handle Image Upload (only update if a new file is chosen)
                     Part filePart = request.getPart("image");
                     String imagePath = uploadImage(filePart, request);
                     if (imagePath != null) {
@@ -96,6 +94,17 @@ public class RoomManagementServlet extends HttpServlet {
                     response.getWriter().print(success ? "{\"status\":\"success\"}" : "{\"status\":\"error\"}");
                 } else {
                     response.getWriter().print("{\"status\":\"error\"}");
+                }
+
+            } else if ("delete".equals(action)) {
+                // NEW ACTION: Delete Room
+                int roomId = Integer.parseInt(request.getParameter("id"));
+                boolean success = roomService.deleteRoom(roomId);
+                if (success) {
+                    response.getWriter().print("{\"status\":\"success\"}");
+                } else {
+                    // Usually fails if the room is attached to reservations in the database (Foreign Key Constraint)
+                    response.getWriter().print("{\"status\":\"error\", \"message\":\"Cannot delete room! It has past or active bookings.\"}");
                 }
 
             } else if ("update_price".equals(action)) {
@@ -110,14 +119,11 @@ public class RoomManagementServlet extends HttpServlet {
         }
     }
 
-    // Helper method to save the uploaded file from the PC to the server folder
     private String uploadImage(Part filePart, HttpServletRequest request) throws IOException {
         if (filePart == null || filePart.getSize() == 0) return null;
-
         String fileName = java.nio.file.Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
         if (fileName == null || fileName.isEmpty()) return null;
 
-        // Save to an 'uploads' directory inside your webapp
         String uploadPath = request.getServletContext().getRealPath("") + File.separator + "uploads";
         File uploadDir = new File(uploadPath);
         if (!uploadDir.exists()) uploadDir.mkdir();

@@ -258,7 +258,7 @@
 
       <div style="display:flex; gap:10px; margin-top: 15px;">
         <button type="submit" class="btn-add" style="margin-top:0;">Save Changes</button>
-        <button type="button" class="btn-del" style="width:100%;" onclick="closeModal()">Cancel</button>
+        <button type="button" class="btn-del" style="width:100%; margin-top:10px;" onclick="closeModal()">Cancel</button>
       </div>
     </form>
   </div>
@@ -397,12 +397,16 @@
       allRoomsData = await res.json();
       tbody.innerHTML = '';
       allRoomsData.forEach(r => {
+        // ADDED THE DELETE BUTTON HERE
         tbody.innerHTML += `<tr>
           <td><img src="${r.image}" class="room-img" onerror="this.src='images/icon1.png'"></td>
           <td><strong>${r.number}</strong></td>
           <td>${r.type}</td>
           <td>$${r.price.toFixed(2)}</td>
-          <td><button class="btn-edit" onclick="openEditModal(${r.id})">Edit</button></td>
+          <td style="display:flex; gap:5px;">
+            <button class="btn-edit" onclick="openEditModal(${r.id})">Edit</button>
+            <button class="btn-del" onclick="deleteRoom(${r.id})">Delete</button>
+          </td>
         </tr>`;
       });
     } catch(e) { tbody.innerHTML='<tr><td colspan="5">Error loading rooms</td></tr>'; }
@@ -417,7 +421,6 @@
     formData.append('price', document.getElementById('rPrice').value);
     formData.append('description', document.getElementById('rDesc').value);
 
-    // Attach the file
     const fileInput = document.getElementById('rImg');
     if(fileInput.files.length > 0) {
       formData.append('image', fileInput.files[0]);
@@ -431,6 +434,26 @@
         document.getElementById('addRoomForm').reset();
         loadAdminRooms();
       } else alert("Error adding room");
+    } catch(e) { alert("Server Error"); }
+  }
+
+  // NEW JS METHOD: Delete Room
+  async function deleteRoom(id) {
+    if(!confirm(`Are you sure you want to completely delete Room ID #${id}?`)) return;
+
+    const formData = new FormData();
+    formData.append('action', 'delete');
+    formData.append('id', id);
+
+    try {
+      const res = await fetch('roomManagement', { method: 'POST', body: formData });
+      const json = await res.json();
+      if(json.status === 'success') {
+        alert("Room deleted successfully!");
+        loadAdminRooms();
+      } else {
+        alert(json.message || "Error deleting room");
+      }
     } catch(e) { alert("Server Error"); }
   }
 

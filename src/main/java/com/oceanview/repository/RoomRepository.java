@@ -10,5 +10,6 @@ public interface RoomRepository {
     List<Room> findAll() throws SQLException;
     boolean save(Room room) throws SQLException;
     boolean updatePrice(int roomId, double newPrice) throws SQLException;
-    boolean updateRoom(Room room) throws SQLException; // NEW METHOD
+    boolean updateRoom(Room room) throws SQLException;
+    boolean delete(int id) throws SQLException; // NEW METHOD
 }

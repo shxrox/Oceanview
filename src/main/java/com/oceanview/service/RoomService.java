@@ -48,9 +48,17 @@ public class RoomService {
         catch (SQLException e) { return false; }
     }
 
-    // NEW METHOD: Handle full room update
     public boolean updateRoomFull(Room room) {
         try { return roomRepository.updateRoom(room); }
         catch (SQLException e) { e.printStackTrace(); return false; }
+    }
+
+    // NEW METHOD: Delete Room
+    public boolean deleteRoom(int id) {
+        try { return roomRepository.delete(id); }
+        catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Returns false if it fails (e.g., if a room has past reservations attached)
+        }
     }
 }
