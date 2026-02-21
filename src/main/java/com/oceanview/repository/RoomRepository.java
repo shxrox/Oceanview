@@ -7,4 +7,8 @@ import java.util.List;
 public interface RoomRepository {
     List<Room> findAvailableRooms(Date checkIn, Date checkOut) throws SQLException;
     Room findById(int id) throws SQLException;
+    List<Room> findAll() throws SQLException;
+    boolean save(Room room) throws SQLException;
+    boolean updatePrice(int roomId, double newPrice) throws SQLException;
+    boolean updateRoom(Room room) throws SQLException; // NEW METHOD
 }

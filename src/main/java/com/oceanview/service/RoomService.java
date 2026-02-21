@@ -1,6 +1,5 @@
 package com.oceanview.service;
 
-// FIXED IMPORTS
 import com.oceanview.repository.RoomRepository;
 import com.oceanview.repository.RoomRepositoryImpl;
 import com.oceanview.model.Room;
@@ -30,22 +29,28 @@ public class RoomService {
     }
 
     public Room getRoomById(int id) {
-        try {
-            return roomRepository.findById(id);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
-        }
+        try { return roomRepository.findById(id); }
+        catch (SQLException e) { return null; }
     }
 
-    // Add this to your existing RoomService class
     public List<Room> getAllRooms() {
-        try {
-            // We can reuse the Repository's finding logic or add a findAll there.
-            // For simplicity, let's assume we add findAll() to RoomRepository.
-            return new com.oceanview.repository.RoomRepositoryImpl().findAll();
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
+        try { return roomRepository.findAll(); }
+        catch (Exception e) { return Collections.emptyList(); }
+    }
+
+    public boolean addNewRoom(Room room) {
+        try { return roomRepository.save(room); }
+        catch (SQLException e) { return false; }
+    }
+
+    public boolean updateRoomPrice(int roomId, double newPrice) {
+        try { return roomRepository.updatePrice(roomId, newPrice); }
+        catch (SQLException e) { return false; }
+    }
+
+    // NEW METHOD: Handle full room update
+    public boolean updateRoomFull(Room room) {
+        try { return roomRepository.updateRoom(room); }
+        catch (SQLException e) { e.printStackTrace(); return false; }
     }
 }
